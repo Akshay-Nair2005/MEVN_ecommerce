@@ -3,10 +3,7 @@
 
         <div class="flex flex-col justify-start gap-5">
 
-            <h2 class="text-4xl font-palaquin font-bold dark:text-white">
-                The <span class="text-coral-red text-4xl font-palaquin font-bold"> Amazon </span> Store
-            </h2>
-
+            
             <p class=" font-montserrat text-center text-slate-gray text-2xl">
                 Experience top-notch quality and style with our sought-after selections. Discover a world of
                 comfort,
