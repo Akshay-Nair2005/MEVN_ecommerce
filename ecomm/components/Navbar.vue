@@ -91,6 +91,7 @@ const colorMode = useColorMode()
 const auth = useFirebaseAuth()
 const user = useCurrentUser()
 const router = useRouter()
+const toast = useToast();
 
 // --- CART state ---
 const cartItems = ref([]);
@@ -171,6 +172,11 @@ async function signInWithGoogle() {
 async function handleSignout() {
   try {
     await signOut(auth)
+    toast.info({
+      title:"SignOut",
+      message:"Signing Out",
+      timeout:3000
+    })
   } catch (err) {
     console.error("Error signing out:", err)
   }

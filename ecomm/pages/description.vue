@@ -14,8 +14,6 @@
       <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-8">
         <NuxtLink to="/" class="hover:text-amber-600 transition-colors">Home</NuxtLink>
         <span>›</span>
-        <NuxtLink to="/products" class="hover:text-amber-600 transition-colors">Products</NuxtLink>
-        <span>›</span>
         <span class="text-amber-600 font-semibold">{{ product.category }}</span>
       </div>
 
@@ -277,13 +275,14 @@ import { useRoute } from 'vue-router'
 import { useFetch } from '#app'
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-
-const currentUser = ref(null);
+const toast = useToast()
 const route = useRoute()
+const router = useRouter();
 const productId = ref(route.query.id)
 const product = ref({})
 const quantity = ref(1)
 const similarItems = ref([])
+const currentUser = ref(null);
 const uid = computed(() => currentUser.value?.uid || null)
 
 
@@ -317,8 +316,8 @@ watch(
 
 const addToCart = async () => {
   if (!uid.value) {
-  alert("Please login first");
- route.replace('/login')
+  toast.warning({title:"Login",message:"Please Login First",timeout:3000})
+  router.replace('/login')
 }
   const data = {
     uid:uid.value,
@@ -344,8 +343,11 @@ const addToCart = async () => {
     })
 
     if (response.ok) {
-      alert(
-        `Added ${quantity.value} item(s) to Cart. Total price: $${product.value.price * quantity.value}`
+      toast.success({
+        title:'Success!',
+        message:`Added ${quantity.value} item(s) to Cart. Total price: $${product.value.price * quantity.value}`,
+        timeout:3000
+      }
       )
     } else {
       console.error('Failed to add item to cart:', response.statusText)

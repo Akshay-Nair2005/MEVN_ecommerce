@@ -177,7 +177,7 @@ app.delete("/server/ecommerce/DeleteCartItem", async (req, res) => {
 
 app.post("/server/ecommerce/StoreUser", async (req, res) => {
   try {
-    const { uid, email, name } = req.body;
+    const { uid, email, name ,phone,pincode,house,area,city,state} = req.body;
 
     if (!uid || !email) {
       return res.status(400).json({ error: "Missing uid or email" });
@@ -187,14 +187,38 @@ app.post("/server/ecommerce/StoreUser", async (req, res) => {
     const existingUser = await database.collection("users").findOne({ uid });
 
     if (existingUser) {
-      return res.json({ message: "User already stored", user: existingUser });
-    }
+   const updatedUser = await database.collection("users").findOneAndUpdate(
+    { uid },
+    {
+      $set: {
+        email,
+        name,
+        phone,
+        pincode,
+        house,
+        area,
+        city,
+        state
+      }
+    },
+    { returnDocument: "after" }
+  );
+
+ return res.json({ message: "User updated", user: updatedUser.value });
+}
+
 
     // Insert new user
     const newUser = {
       uid,
       email,
       name,
+      phone,
+      pincode,
+      house,
+      area,
+      city,
+      state,
       createdAt: new Date(),
     };
 

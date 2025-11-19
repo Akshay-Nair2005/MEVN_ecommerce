@@ -32,90 +32,77 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue"
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword 
-} from "firebase/auth";
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, updateEmail } from 'firebase/auth'
 
-const auth = useFirebaseAuth()
+// use a single auth instance (either getAuth() or your useFirebaseAuth() wrapper)
+const auth = getAuth() // or: const auth = useFirebaseAuth()
 const router = useRouter()
 
+const currentUser = ref(null)
+const uid = computed(() => currentUser.value?.uid ?? null)
 
-async function signInWithGoogle() {
-  const result = await signInWithPopup(auth, new GoogleAuthProvider());
-  const user = result.user;
-
-  await saveUserInDB(user.uid, user.email, user.displayName);
-
-  router.replace("/");
-
-  await $fetch("http://localhost:2500/server/ecommerce/StoreUser", {
-  method: "POST",
-  body: {
-    uid: user.uid,
-    email: user.email,
-    name: user.displayName
+// Keep onAuthStateChanged as the source of truth and do redirect there
+onAuthStateChanged(auth, (user) => {
+  currentUser.value = user
+  if (user) {
+    // user is signed in -> redirect to home
+    router.replace('/')
+  } else {
+    // not signed in — keep on the page (or redirect to login if needed)
+    // router.replace('/login')
   }
-});
+})
+
+// You do not need this separate CheckUser call now, but if you keep it:
+// onMounted(() => CheckUser())
+
+// --- Auth functions (unchanged, but using `auth` above) ---
+async function signInWithGoogle() {
+  const result = await signInWithPopup(auth, new GoogleAuthProvider())
+  const user = result.user
+  await saveUserInDB(user.uid, user.email, user.displayName)
+  // backend store (duplicate but kept from your code)
+  await $fetch("http://localhost:2500/server/ecommerce/StoreUser", {
+    method: "POST",
+    body: { uid: user.uid, email: user.email, name: user.displayName }
+  })
+  router.replace("/")
 }
 
 async function saveUserInDB(uid, email, name) {
   await $fetch("http://localhost:2500/server/ecommerce/StoreUser", {
     method: "POST",
     body: { uid, email, name }
-  });
+  })
 }
-
-
-
 
 // Form Data
 const email = ref("")
 const password = ref("")
-
-// Validation errors
-const errors = ref({
-  email: "",
-  password: ""
-})
+const errors = ref({ email: "", password: "" })
 
 function validateForm() {
   let valid = true
   errors.value = { email: "", password: "" }
-
-  if (!email.value) {
-    errors.value.email = "Email is required"
-    valid = false
-  }
-
-  if (!password.value) {
-    errors.value.password = "Password is required"
-    valid = false
-  } else if (password.value.length < 6) {
-    errors.value.password = "Password must be at least 6 characters"
-    valid = false
-  }
-
+  if (!email.value) { errors.value.email = "Email is required"; valid = false }
+  if (!password.value) { errors.value.password = "Password is required"; valid = false }
+  else if (password.value.length < 6) { errors.value.password = "Password must be at least 6 characters"; valid = false }
   return valid
 }
 
-// Manual Login
 async function loginManual() {
   if (!validateForm()) return
-
   try {
     await signInWithEmailAndPassword(auth, email.value, password.value)
     router.push("/")
   } catch (err) {
     errors.value.email = "Invalid email or password"
+    console.error(err)
   }
 }
-
-
-
-
 </script>
+
 
 <style></style>

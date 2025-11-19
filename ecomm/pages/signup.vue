@@ -1,14 +1,31 @@
 <script setup>
 import { ref } from "vue"
-import { createUserWithEmailAndPassword } from "firebase/auth"
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, updateEmail } from 'firebase/auth'
 
-const auth = useFirebaseAuth()
-const router = useRouter()
+
 
 const email = ref("")
 const password = ref("")
 const username = ref("")
 const errorMessage = ref("")
+
+const auth = getAuth() // or: const auth = useFirebaseAuth()
+const router = useRouter()
+
+const currentUser = ref(null)
+const uid = computed(() => currentUser.value?.uid ?? null)
+
+// Keep onAuthStateChanged as the source of truth and do redirect there
+onAuthStateChanged(auth, (user) => {
+  currentUser.value = user
+  if (user) {
+    // user is signed in -> redirect to home
+    router.replace('/')
+  } else {
+    // not signed in — keep on the page (or redirect to login if needed)
+    // router.replace('/login')
+  }
+})
 
 // Store user in DB
 async function saveUserInDB(uid, email, name) {

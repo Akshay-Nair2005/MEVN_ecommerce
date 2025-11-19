@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   alias: {
     "./runtimeConfig": "./runtimeConfig.browser"
   },
-  modules: ["@nuxtjs/tailwindcss", "@nuxtjs/color-mode","nuxt-vuefire"],
+  modules: ["@nuxtjs/tailwindcss", "@nuxtjs/color-mode", "nuxt-vuefire", "nuxt-toast"],
   colorMode: {
     classSuffix: "",
     preference: 'system', // Default to system mode
