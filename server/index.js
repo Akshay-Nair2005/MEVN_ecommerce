@@ -1,8 +1,8 @@
-const express = require("express");
-const { MongoClient, ObjectId } = require("mongodb");
-const cors = require("cors");
+import express from 'express';
+import {MongoClient,ObjectId} from 'mongodb'
+import cors from 'cors'
 
-require("dotenv").config();
+import 'dotenv/config';
 
 const app = express();
 app.use(cors());
@@ -12,6 +12,13 @@ const CONNECTION_STRING = "mongodb://127.0.0.1:27017/";
 const dbName = "ecommerce";
 let database;
 let collection;
+
+
+export default async function db() {
+  if (mongoose.connection.readyState === 1) return; // Already connected
+  return mongoose.connect(process.env.MONGO_URL);
+}
+
 
 // ----------------- MongoDB Connection -----------------
 async function connectDB() {
@@ -38,9 +45,51 @@ async function connectDB() {
 connectDB();
 
 
+app.post("/server/auth/mongo-signup", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const exist = await database.collection("users").findOne({ email });
+
+    if (exist) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    const user = await database.collection("users").insertOne({
+      email,
+      password,
+      provider: "mongodb",
+      createdAt: new Date(),
+    });
+
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 
-const Stripe = require("stripe");
+app.post("/server/auth/mongo-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await database.collection("users").findOne({
+      email,
+      password,
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Invalid credentials" });
+    }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 app.post("/api/stripe/create-intent", async (req, res) => {
@@ -64,7 +113,14 @@ app.post("/api/stripe/create-intent", async (req, res) => {
 // Get all cart items
 app.get("/server/ecommerce/GetCartItems", async (req, res) => {
   try {
-    const result = await collection.find({}).toArray();
+    const uid = req.query.uid;
+
+     if (!uid) {
+      return res.status(400).json({ error: "Missing uid" });
+    }
+
+
+    const result = await collection.find({uid}).toArray();
     res.json(result);
   } catch (error) {
     console.error("Error retrieving cart items:", error);
@@ -75,12 +131,16 @@ app.get("/server/ecommerce/GetCartItems", async (req, res) => {
 // Add item to cart
 app.post("/server/ecommerce/AddToCart", async (req, res) => {
   try {
-    const { productId, quantity, product } = req.body;
-
+    const { uid,productId, quantity, product } = req.body;
+    if (!uid) {
+      return res.status(400).json({ error: "Missing user UID" });
+    }
     const result = await collection.insertOne({
+      uid,
       productId,
       quantity,
       product,
+      createdAt: new Date()
     });
 
     res.json({ message: "Added to cart successfully", id: result.insertedId });
@@ -111,3 +171,55 @@ app.delete("/server/ecommerce/DeleteCartItem", async (req, res) => {
     res.status(500).json({ error: "Failed to delete cart item" });
   }
 });
+
+
+// ----------------- User Storage API -----------------
+
+app.post("/server/ecommerce/StoreUser", async (req, res) => {
+  try {
+    const { uid, email, name } = req.body;
+
+    if (!uid || !email) {
+      return res.status(400).json({ error: "Missing uid or email" });
+    }
+
+    // Check if user already exists
+    const existingUser = await database.collection("users").findOne({ uid });
+
+    if (existingUser) {
+      return res.json({ message: "User already stored", user: existingUser });
+    }
+
+    // Insert new user
+    const newUser = {
+      uid,
+      email,
+      name,
+      createdAt: new Date(),
+    };
+
+    await database.collection("users").insertOne(newUser);
+
+    res.json({ message: "User stored successfully", user: newUser });
+
+  } catch (error) {
+    console.error("Error storing user:", error);
+    res.status(500).json({ error: "Failed to store user" });
+  }
+});
+
+
+app.post("/api/custom-login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await database.collection("users").findOne({ email });
+
+  if (!user)
+    return res.status(404).json({ error: "User not found" });
+
+  if (user.password !== password)
+    return res.status(401).json({ error: "Wrong password" });
+
+  return res.json({ success: true, user });
+});
+

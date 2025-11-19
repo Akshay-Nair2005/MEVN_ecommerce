@@ -6,6 +6,10 @@ export default defineNuxtConfig({
   modules: ["@nuxtjs/tailwindcss", "@nuxtjs/color-mode","nuxt-vuefire"],
   colorMode: {
     classSuffix: "",
+    preference: 'system', // Default to system mode
+    fallback: 'light',    // Fallback if system preference not detected
+    storageKey: 'nuxt-color-mode' 
+
   },
   ssr: false,
   vite: {

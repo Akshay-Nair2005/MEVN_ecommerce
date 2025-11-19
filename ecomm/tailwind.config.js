@@ -1,14 +1,14 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode:"class",
   content: [
-    "./components/**/*.{js,vue,ts}",
+    "./components/**/*s.{js,vue,ts}",
     "./layouts/**/*.vue",
     "./pages/**/*.vue",
     "./plugins/**/*.{js,ts}",
     "./app.vue",
     "./error.vue",
   ],
-  darkMode:"class",
   theme: {
     fontSize: {
       xs: ['12px', '16px'],

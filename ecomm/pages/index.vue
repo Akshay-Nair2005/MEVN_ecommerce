@@ -1,16 +1,8 @@
 <template>
+   <themeb />
   <div class="min-h-screen bg-white dark:bg-[#19193f] transition-colors duration-500">
     <!-- Header -->
-    <header
-      class="sticky top-0 z-40 flex items-center justify-between px-8 py-4  dark:bg-[#19193f]/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm"
-    >
-
-      <!-- Navbar -->
-      <Navbar />
-
-      <!-- Right Section -->
-     
-    </header>
+    <Navbar />
 
     <!-- Products Section -->
     <main class="px-6 md:px-10 lg:px-20 mt-10 pb-10">
