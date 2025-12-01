@@ -29,7 +29,7 @@
 
 
         <!-- Right Icons + Theme -->
-        <div class="flex items-center space-x-3 md:ml-4 mt-4 md:mt-0">
+        <div class="flex items-center space-x-6 md:ml-4 mt-4 md:mt-0">
           <button class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#2a2a5a] transition"
             aria-label="Cart">
             <NuxtLink :to="currentUser ? `/cart?userid=${currentUser.uid}` : '/login'">
@@ -45,8 +45,8 @@
 
 
           <!-- Auth Buttons -->
-          <div v-if="user" class="flex items-center gap-2">
-            <NuxtLink to="/userprofile"> <img :src="user.photoURL" alt="Profile" class="w-8 h-8 rounded-full border border-indigo-500" /></NuxtLink>
+          <div v-if="user" class="flex items-center gap-4">
+             <img :src="user.photoURL" alt="Profile" class="w-8 h-8 rounded-full border border-indigo-500" />
             <button class="p-2 rounded-lg bg-red-500 hover:bg-red-600 text-white transition"
               @click="handleSignout">Logout</button>
           </div>
