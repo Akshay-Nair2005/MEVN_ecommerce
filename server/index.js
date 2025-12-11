@@ -1,26 +1,36 @@
-import express from 'express';
-import {MongoClient,ObjectId} from 'mongodb'
-import cors from 'cors'
-
-import 'dotenv/config';
+// server.js
+import express from "express";
+import cors from "cors";
+import { MongoClient, ObjectId } from "mongodb";
+import Stripe from "stripe";
+import "dotenv/config";
 
 const app = express();
+
+// ----- MIDDLEWARE -----
 app.use(cors());
-app.use(express.json()); // Parse JSON
+app.use(express.json());
 
-const CONNECTION_STRING = "mongodb://127.0.0.1:27017/";
-const dbName = "ecommerce";
+// ----- CONFIG -----
+const PORT = process.env.PORT || 2500;
+
+// If you want, you can put full URL like "mongodb://127.0.0.1:27017/ecommerce" in MONGO_URL
+const CONNECTION_STRING =
+  process.env.MONGO_URL || "mongodb://127.0.0.1:27017/";
+const DB_NAME = process.env.DB_NAME || "ecommerce";
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(stripeSecretKey);
+
+// ----- DB VARS -----
 let database;
-let collection;
+let cartCollection;    // your "ecommercec" collection
+let usersCollection;
+let ordersCollection;
+let productsCollection;
 
 
-export default async function db() {
-  if (mongoose.connection.readyState === 1) return; // Already connected
-  return mongoose.connect(process.env.MONGO_URL);
-}
-
-
-// ----------------- MongoDB Connection -----------------
+// ----- CONNECT TO MONGODB -----
 async function connectDB() {
   try {
     const client = await MongoClient.connect(CONNECTION_STRING, {
@@ -28,55 +38,66 @@ async function connectDB() {
       useUnifiedTopology: true,
     });
 
-    database = client.db(dbName);
-    collection = database.collection("ecommercec");
+    database = client.db(DB_NAME);
 
-    console.log("✅ Connected to MongoDB & collection ready");
+    // same collection name you used before
+    cartCollection = database.collection("ecommercec");
+    usersCollection = database.collection("users");
+    ordersCollection = database.collection("orders");
+    productsCollection = database.collection("products");
+
+    console.log("✅ Connected to MongoDB:", DB_NAME);
 
     // Start server only after DB is ready
-    app.listen(2500, () => {
-      console.log("🚀 Server running at http://localhost:2500");
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   } catch (error) {
     console.error("❌ Failed to connect to MongoDB:", error);
     process.exit(1);
   }
 }
+
 connectDB();
 
+// ===================================================
+//                    AUTH ROUTES
+// ===================================================
 
+// Signup with Mongo (email + password)
 app.post("/server/auth/mongo-signup", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const exist = await database.collection("users").findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password required" });
+    }
 
+    const exist = await usersCollection.findOne({ email });
     if (exist) {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const user = await database.collection("users").insertOne({
+    const result = await usersCollection.insertOne({
       email,
       password,
       provider: "mongodb",
       createdAt: new Date(),
     });
 
-    res.json({ success: true, user });
+    res.json({ success: true, user: result });
   } catch (error) {
+    console.error("mongo-signup error:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
-
+// Basic login
 app.post("/server/auth/mongo-login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await database.collection("users").findOne({
-      email,
-      password,
-    });
+    const user = await usersCollection.findOne({ email, password });
 
     if (!user) {
       return res.status(400).json({ error: "Invalid credentials" });
@@ -84,22 +105,51 @@ app.post("/server/auth/mongo-login", async (req, res) => {
 
     res.json({ success: true, user });
   } catch (error) {
+    console.error("mongo-login error:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
+// Another custom login (same logic)
+app.post("/api/custom-login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const user = await usersCollection.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (user.password !== password) {
+      return res.status(401).json({ error: "Wrong password" });
+    }
+
+    return res.json({ success: true, user });
+  } catch (error) {
+    console.error("custom-login error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ===================================================
+//                 STRIPE PAYMENT INTENT
+// ===================================================
 
 app.post("/api/stripe/create-intent", async (req, res) => {
   try {
     const { amount } = req.body;
+
+    if (!amount || typeof amount !== "number") {
+      return res.status(400).json({ error: "Invalid amount" });
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // convert ₹ → paise
+      amount: Math.round(amount * 100), // rupees → paise
       currency: "inr",
       automatic_payment_methods: { enabled: true },
     });
+
     res.json({ client_secret: paymentIntent.client_secret });
   } catch (err) {
     console.error("Stripe error:", err);
@@ -107,20 +157,20 @@ app.post("/api/stripe/create-intent", async (req, res) => {
   }
 });
 
+// ===================================================
+//                     CART ROUTES
+// ===================================================
 
-// ----------------- Cart API -----------------
-
-// Get all cart items
+// Get all cart items for a user
 app.get("/server/ecommerce/GetCartItems", async (req, res) => {
   try {
     const uid = req.query.uid;
 
-     if (!uid) {
+    if (!uid) {
       return res.status(400).json({ error: "Missing uid" });
     }
 
-
-    const result = await collection.find({uid}).toArray();
+    const result = await cartCollection.find({ uid }).toArray();
     res.json(result);
   } catch (error) {
     console.error("Error retrieving cart items:", error);
@@ -128,22 +178,78 @@ app.get("/server/ecommerce/GetCartItems", async (req, res) => {
   }
 });
 
+//get all products
+app.get("/server/ecommerce/GetProducts", async (req, res) => {
+  try {
+    const products = await productsCollection.find().toArray();
+    res.json(products);
+  } catch (error) {
+    console.error("Error retrieving products:", error);
+    res.status(500).json({ error: "Failed to retrieve products" });
+  }
+});
+
+//get single product by id
+app.get("/server/ecommerce/GetProducts/:id", async (req, res) => {
+  try {
+    const productId = Number(req.params.id);
+
+    if (isNaN(productId)) {
+      return res.status(400).json({ error: "Product ID must be a number" });
+    }
+
+    const product = await productsCollection.findOne({ id: productId });
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error("Error retrieving product:", error);
+    res.status(500).json({ error: "Failed to retrieve product" });
+  }
+});
+
+
+//get orders for a user
+app.get("/server/ecommerce/GetOrders", async (req, res) => {
+  try {
+    const uid = req.query.uid;
+
+    if (!uid) {
+      return res.status(400).json({ error: "Missing uid" });
+    }
+
+    const result = await ordersCollection.find({ uid }).toArray();
+    res.json(result);
+  } catch (error) {
+    console.error("Error retrieving orders:", error);
+    res.status(500).json({ error: "Failed to retrieve orders" });
+  }
+});
+
 // Add item to cart
 app.post("/server/ecommerce/AddToCart", async (req, res) => {
   try {
-    const { uid,productId, quantity, product } = req.body;
+    const { uid, productId, quantity, product } = req.body;
+
     if (!uid) {
       return res.status(400).json({ error: "Missing user UID" });
     }
-    const result = await collection.insertOne({
+
+    const result = await cartCollection.insertOne({
       uid,
       productId,
       quantity,
       product,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
 
-    res.json({ message: "Added to cart successfully", id: result.insertedId });
+    res.json({
+      message: "Added to cart successfully",
+      id: result.insertedId,
+    });
   } catch (error) {
     console.error("Error adding to cart:", error);
     res.status(500).json({ error: "Failed to add to cart" });
@@ -155,11 +261,11 @@ app.delete("/server/ecommerce/DeleteCartItem", async (req, res) => {
   try {
     const id = req.query.id;
 
-    if (!ObjectId.isValid(id)) {
+    if (!id || !ObjectId.isValid(id)) {
       return res.status(400).json({ error: "Invalid ID format" });
     }
 
-    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+    const result = await cartCollection.deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 1) {
       res.json({ message: "Deleted Successfully" });
@@ -172,41 +278,42 @@ app.delete("/server/ecommerce/DeleteCartItem", async (req, res) => {
   }
 });
 
-
-// ----------------- User Storage API -----------------
+// ===================================================
+//                  USER STORAGE / ADDRESS
+// ===================================================
 
 app.post("/server/ecommerce/StoreUser", async (req, res) => {
   try {
-    const { uid, email, name ,phone,pincode,house,area,city,state} = req.body;
+    const { uid, email, name, phone, pincode, house, area, city, state } =
+      req.body;
 
     if (!uid || !email) {
       return res.status(400).json({ error: "Missing uid or email" });
     }
 
     // Check if user already exists
-    const existingUser = await database.collection("users").findOne({ uid });
+    const existingUser = await usersCollection.findOne({ uid });
 
     if (existingUser) {
-   const updatedUser = await database.collection("users").findOneAndUpdate(
-    { uid },
-    {
-      $set: {
-        email,
-        name,
-        phone,
-        pincode,
-        house,
-        area,
-        city,
-        state
-      }
-    },
-    { returnDocument: "after" }
-  );
+      const updatedUser = await usersCollection.findOneAndUpdate(
+        { uid },
+        {
+          $set: {
+            email,
+            name,
+            phone,
+            pincode,
+            house,
+            area,
+            city,
+            state,
+          },
+        },
+        { returnDocument: "after" }
+      );
 
- return res.json({ message: "User updated", user: updatedUser.value });
-}
-
+      return res.json({ message: "User updated", user: updatedUser.value });
+    }
 
     // Insert new user
     const newUser = {
@@ -222,28 +329,65 @@ app.post("/server/ecommerce/StoreUser", async (req, res) => {
       createdAt: new Date(),
     };
 
-    await database.collection("users").insertOne(newUser);
+    await usersCollection.insertOne(newUser);
 
     res.json({ message: "User stored successfully", user: newUser });
-
   } catch (error) {
     console.error("Error storing user:", error);
     res.status(500).json({ error: "Failed to store user" });
   }
 });
 
+// ===================================================
+//                     ADD ORDER API
+// ===================================================
+// Frontend sends: { uid, orders: [ { productId, quantity, product? } ] }
 
-app.post("/api/custom-login", async (req, res) => {
-  const { email, password } = req.body;
+app.post("/server/ecommerce/AddOrder", async (req, res) => {
+  try {
+    const { uid, orders } = req.body;
 
-  const user = await database.collection("users").findOne({ email });
+    if (!uid || !Array.isArray(orders) || orders.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "uid and orders array are required",
+      });
+    }
 
-  if (!user)
-    return res.status(404).json({ error: "User not found" });
+    // Build docs for orders collection
+    const docs = orders.map((o) => {
+      if (!o.productId || !o.quantity) {
+        throw new Error("Each order must have productId and quantity");
+      }
 
-  if (user.password !== password)
-    return res.status(401).json({ error: "Wrong password" });
+      return {
+        uid,
+        productId: o.productId,
+        quantity: o.quantity,
+        product: o.product || null, // optional snapshot of product
+        createdAt: new Date(),
+      };
+    });
 
-  return res.json({ success: true, user });
+    const result = await ordersCollection.insertMany(docs);
+
+    return res.status(201).json({
+      success: true,
+      message: "Orders created successfully",
+      insertedCount: result.insertedCount,
+      orderIds: Object.values(result.insertedIds),
+    });
+  } catch (err) {
+    console.error("AddOrder error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while creating orders",
+    });
+  }
 });
 
+
+
+app.get("/", (req, res) => {
+  res.send("Ecommerce API is running ✅");
+});

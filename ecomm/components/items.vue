@@ -358,7 +358,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 // Original data fetch (unchanged)
-const { data } = await useFetch('https://fakestoreapi.com/products')
+const { data } = await useFetch('http://localhost:2500/server/ecommerce/GetProducts')
 
 // Carousel & UI state
 const currentIndex = ref(0)

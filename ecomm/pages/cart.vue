@@ -27,7 +27,7 @@
         <h3 class="text-2xl font-semibold mb-4 dark:text-white">Your cart is empty</h3>
         <p class="text-gray-600 dark:text-gray-400 mb-6">Start shopping to add amazing products to your cart!</p>
         <NuxtLink 
-          to="/products" 
+          to="/" 
           class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition duration-200 transform hover:-translate-y-1"
         >
           Start Shopping
@@ -369,16 +369,24 @@ const removeFromCart = async (productId) => {
 /* Push to orders */
 const pushToOrders = async (items) => {
   try {
+    const payload = {
+      uid: userUid.value,
+      orders: items.map((item) => ({
+        productId: item.product._id || item.productId, // adjust if your field is different
+        quantity: item.quantity,
+      })),
+    };
+
     await fetch("http://localhost:2500/server/ecommerce/AddOrder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({userUid:userUid.value, items }),
+      body: JSON.stringify(payload),
     });
-    
   } catch (err) {
     console.error("AddOrder error:", err);
   }
 };
+
 
 /* Click Pay — first open address form */
 const onClickPay = (amount, item) => {

@@ -287,11 +287,11 @@ const uid = computed(() => currentUser.value?.uid || null)
 
 
 const fetchProduct = async (id) => {
-  const response = await fetch(`https://fakestoreapi.com/products/${id}`)
+  const response = await fetch(`http://localhost:2500/server/ecommerce/GetProducts/${id}`)
   product.value = await response.json()
 
   // Fetch all products for similar items
-  const { data } = await useFetch('https://fakestoreapi.com/products')
+  const { data } = await useFetch('http://localhost:2500/server/ecommerce/GetProducts')
   if (data.value) {
     similarItems.value = data.value.filter(
       (item) => item.category === product.value.category && item.id !== product.value.id
