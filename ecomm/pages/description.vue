@@ -259,9 +259,13 @@
                 >
                   View Details
                 </NuxtLink>
+
               </div>
             </div>
           </div>
+        </div>
+        <div class="mt-2">
+          <Review />
         </div>
       </div>
     </div>

@@ -10,6 +10,9 @@
 
       <div class="">
         <Items />
+        <div class="">
+          <Chatbot />
+        </div>
       </div>
     </main>
   </div>
