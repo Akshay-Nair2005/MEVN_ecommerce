@@ -222,7 +222,7 @@
 import { ref, nextTick, onMounted } from 'vue'
 
 // Add your Gemini API key here
-const GEMINI_API_KEY = 'AIzaSyAJC6v0_5Qz64loAxFK0o9UXjiJpLf1M7o' // Replace with your actual API key from https://makersuite.google.com/app/apikey
+const GEMINI_API_KEY = 'You api key' // Replace with your actual API key from https://makersuite.google.com/app/apikey
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`
 
 // Reactive state
