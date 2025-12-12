@@ -73,7 +73,7 @@
           <!-- Welcome message -->
           <div v-if="messages.length === 0" class="welcome-message">
             <div class="welcome-content">
-              <div class="w--16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+              <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
                 <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
@@ -222,8 +222,8 @@
 import { ref, nextTick, onMounted } from 'vue'
 
 // Add your Gemini API key here
-const GEMINI_API_KEY = 'GEMINI_KEY_HERE'// Replace with your actual API key
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`
+const GEMINI_API_KEY = 'AIzaSyAJC6v0_5Qz64loAxFK0o9UXjiJpLf1M7o' // Replace with your actual API key from https://makersuite.google.com/app/apikey
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`
 
 // Reactive state
 const isChatOpen = ref(false)
@@ -242,11 +242,7 @@ const quickQuestions = ref([
 
 // Initialize with a welcome message
 onMounted(() => {
-  // You could load previous messages from localStorage here
-  const savedMessages = localStorage.getItem('chatbotMessages')
-  if (savedMessages) {
-    messages.value = JSON.parse(savedMessages)
-  }
+  // Messages will be fresh for every session
 })
 
 const toggleChat = () => {
@@ -272,9 +268,6 @@ const sendMessage = async () => {
   const messageToSend = userInput.value.trim()
   userInput.value = ''
   
-  // Save to localStorage
-  saveMessages()
-  
   // Scroll to bottom
   scrollToBottom()
   
@@ -295,6 +288,11 @@ const getAIResponse = async (userMessage) => {
   isProcessing.value = true
   
   try {
+    // Check if API key is set
+    if (GEMINI_API_KEY === 'YOUR_ACTUAL_API_KEY_HERE') {
+      throw new Error('Please set your Gemini API key in the component')
+    }
+
     const response = await fetch(GEMINI_API_URL, {
       method: 'POST',
       headers: {
@@ -310,7 +308,9 @@ const getAIResponse = async (userMessage) => {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to get response from Gemini')
+      const errorData = await response.json()
+      console.error('API Error:', errorData)
+      throw new Error(errorData?.error?.message || 'Failed to get response from Gemini')
     }
 
     const data = await response.json()
@@ -326,12 +326,11 @@ const getAIResponse = async (userMessage) => {
     console.error('Error getting AI response:', error)
     messages.value.push({
       role: 'assistant',
-      content: 'Sorry, I encountered an error. Please try again.',
+      content: `Sorry, I encountered an error: ${error.message}. Please check your API key and try again.`,
       timestamp: new Date()
     })
   } finally {
     isProcessing.value = false
-    saveMessages()
     scrollToBottom()
   }
 }
@@ -342,12 +341,6 @@ const scrollToBottom = () => {
       messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight
     }
   })
-}
-
-const saveMessages = () => {
-  // Keep only last 50 messages to avoid localStorage overflow
-  const recentMessages = messages.value.slice(-50)
-  localStorage.setItem('chatbotMessages', JSON.stringify(recentMessages))
 }
 
 const formatMessage = (text) => {
