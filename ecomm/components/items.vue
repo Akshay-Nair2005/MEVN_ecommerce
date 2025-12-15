@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-h-screen bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/20 dark:from-[#0f1028] dark:via-[#0d0e24] dark:to-[#131230] text-gray-900 dark:text-gray-100">
+    class="min-h-screen bg-gradient-to-br bg-transparent text-gray-900 dark:text-gray-100">
     <!-- Enhanced Header -->
 
 

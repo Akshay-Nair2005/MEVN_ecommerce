@@ -27,6 +27,16 @@
         mobileOpen ? 'opacity-100 visible p-4' : 'opacity-0 invisible md:opacity-100 md:visible'
       ]">
 
+        <!-- Navigation Links -->
+        <div class="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+          <NuxtLink 
+            v-if="currentUser" 
+            :to="`/myorder?userid=${currentUser.uid}`" 
+            class="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors duration-200"
+          >
+            📦 My Orders
+          </NuxtLink>
+        </div>
 
         <!-- Right Icons + Theme -->
         <div class="flex items-center space-x-6 md:ml-4 mt-4 md:mt-0">
@@ -56,19 +66,18 @@
               @click="signInWithGoogle">Login</button>
           </div>
 
-          <div class="relative">
-            <select v-model="colorMode.preference" class="appearance-none px-4 py-2 pr-8 rounded-md border-2 border-gray-900 dark:border-white 
-                     bg-gray-50 dark:bg-slate-800 text-gray-800 dark:text-white 
-                     focus:ring-2 focus:ring-[#FF6347] focus:border-[#FF6347] cursor-pointer text-sm transition">
-              <option value="system">System</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-            <span
-              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300">
-              ▼
-            </span>
-          </div>
+          <button 
+            @click="toggleTheme"
+            class="p-2 rounded-lg border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+            :title="colorMode.preference === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          >
+            <svg v-if="colorMode.preference === 'dark'" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+            </svg>
+            <svg v-else class="w-5 h-5 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+          </button>
 
         </div>
       </nav>
@@ -79,7 +88,6 @@
 <script setup>
 import { ref, watch, onMounted, computed } from "vue"
 import { useRouter } from "vue-router"
-import { useColorMode } from "@vueuse/core"
 import { useFirebaseAuth, useCurrentUser } from "vuefire"
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth"
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -158,6 +166,11 @@ onAuthStateChanged(authh, (user) => {
     cartItems.value = []; // clear cart when logged out
   }
 });
+
+// --- Theme toggle ---
+function toggleTheme() {
+  colorMode.preference = colorMode.preference === 'dark' ? 'light' : 'dark'
+}
 
 // --- Auth helpers (unchanged) ---
 async function signInWithGoogle() {

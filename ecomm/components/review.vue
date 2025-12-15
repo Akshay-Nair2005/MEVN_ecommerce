@@ -1,7 +1,7 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+    <div class="min-h-screen bg-gradient-to-br bg-transparent p-4 md:p-8">
         <!-- Header -->
-        <header class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-2xl shadow-xl mb-8 p-8">
+        <!-- <header class="bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-2xl shadow-xl mb-8 p-8">
             <div class="max-w-7xl mx-auto">
                 <div class="flex items-center justify-between">
                     <div>
@@ -25,13 +25,13 @@
                     </div>
                 </div>
             </div>
-        </header>
+        </header> -->
 
         <div class="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
             <!-- Left Column: Product Info & Reviews -->
             <div class="lg:w-2/3">
                 <!-- Product Info Card -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
+                <div class="bg-transparent rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
                     <div class="flex flex-col md:flex-row gap-6">
                         <!-- Product Image -->
                         <div class="md:w-1/3">
@@ -86,7 +86,7 @@
                 </div>
 
                 <!-- Reviews List -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <div class="bg-transparent rounded-2xl shadow-lg p-6 border border-gray-200">
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-xl font-bold text-gray-900">Customer Reviews</h3>
                         <div class="flex items-center space-x-2">
@@ -108,7 +108,7 @@
                         <div 
                             v-for="(review, index) in filteredReviews" 
                             :key="index" 
-                            class="bg-gradient-to-r from-white to-gray-50 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 p-5"
+                            class="bg-gradient-to-r  rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 p-5"
                         >
                             <!-- Review Header -->
                             <div class="flex items-start justify-between mb-4">
@@ -117,7 +117,7 @@
                                         {{ review.author.charAt(0) }}
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900">{{ review.author }}</h4>
+                                        <h4 class="font-bold text-gray-900 dark:text-white">{{ review.author }}</h4>
                                         <div class="flex items-center space-x-2 mt-1">
                                             <div class="flex">
                                                 <div v-for="i in 5" :key="i" class="w-4 h-4">
@@ -206,7 +206,7 @@
             <!-- Right Column: Add Review & Product Selector -->
             <div class="lg:w-1/3">
                 <!-- Product Selector -->
-                <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
+                <div class="bg-transparent rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">Select Product</h3>
                     <div class="space-y-3">
                         <button
@@ -236,7 +236,7 @@
                 </div>
 
                 <!-- Add Review Form -->
-                <div class="sticky top-8 bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
+                <div class="sticky top-8 bg-transparent rounded-2xl shadow-xl border border-gray-200 p-6">
                     <div class="text-center mb-6">
                         <div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

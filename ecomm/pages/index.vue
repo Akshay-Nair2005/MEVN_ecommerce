@@ -1,5 +1,4 @@
 <template>
-   <themeb />
   <div class="min-h-screen bg-white dark:bg-[#19193f] transition-colors duration-500">
     <!-- Header -->
     <Navbar />
