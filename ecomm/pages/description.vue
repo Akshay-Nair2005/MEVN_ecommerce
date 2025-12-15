@@ -298,7 +298,7 @@ const fetchProduct = async (id) => {
   const { data } = await useFetch('http://localhost:2500/server/ecommerce/GetProducts')
   if (data.value) {
     similarItems.value = data.value.filter(
-      (item) => item.category === product.value.category && item.id !== product.value.id
+      (item) => item.category === product.value.categsory && item.id !== product.value.id
     )
   }
 }

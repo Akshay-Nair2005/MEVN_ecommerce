@@ -83,6 +83,7 @@ app.post("/server/auth/mongo-signup", async (req, res) => {
       password,
       provider: "mongodb",
       createdAt: new Date(),
+      isAdmin:false
     });
 
     res.json({ success: true, user: result });
@@ -211,6 +212,92 @@ app.get("/server/ecommerce/GetProducts/:id", async (req, res) => {
   }
 });
 
+// Add new product
+app.post("/server/ecommerce/AddProduct", async (req, res) => {
+  try {
+    const { id, title, price, description, category, image, rating } = req.body;
+
+    if (!id || !title || !price || !category) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const newProduct = {
+      id: Number(id),
+      title,
+      price: Number(price),
+      description,
+      category,
+      image,
+      rating: rating || { rate: 0, count: 0 },
+      createdAt: new Date(),
+    };
+
+    const result = await productsCollection.insertOne(newProduct);
+    res.status(201).json({ message: "Product added successfully", id: result.insertedId });
+  } catch (error) {
+    console.error("Error adding product:", error);
+    res.status(500).json({ error: "Failed to add product" });
+  }
+});
+
+// Update product
+app.put("/server/ecommerce/UpdateProduct/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { title, price, description, category, image, rating } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    const updateData = {
+      title,
+      price: Number(price),
+      description,
+      category,
+      image,
+      rating,
+      updatedAt: new Date(),
+    };
+
+    const result = await productsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json({ message: "Product updated successfully" });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).json({ error: "Failed to update product" });
+  }
+});
+
+// Delete product
+app.delete("/server/ecommerce/DeleteProduct/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    const result = await productsCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ error: "Failed to delete product" });
+  }
+});
+
 
 //get orders for a user
 app.get("/server/ecommerce/GetOrders", async (req, res) => {
@@ -275,6 +362,91 @@ app.delete("/server/ecommerce/DeleteCartItem", async (req, res) => {
   } catch (error) {
     console.error("Error deleting cart item:", error);
     res.status(500).json({ error: "Failed to delete cart item" });
+  }
+});
+
+// ===================================================
+//                  USER MANAGEMENT
+// ===================================================
+
+// Get all users
+app.get("/server/ecommerce/GetUsers", async (req, res) => {
+  try {
+    const allUsers = await usersCollection.find().toArray();
+    res.json(allUsers);
+  } catch (error) {
+    console.error("Error retrieving users:", error);
+    res.status(500).json({ error: "Failed to retrieve users" });
+  }
+});
+
+// Get user by uid (for checking admin status)
+app.get("/server/ecommerce/GetUser/:uid", async (req, res) => {
+  try {
+    const uid = req.params.uid;
+
+    if (!uid) {
+      return res.status(400).json({ error: "Missing uid" });
+    }
+
+    const user = await usersCollection.findOne({ uid });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error retrieving user:", error);
+    res.status(500).json({ error: "Failed to retrieve user" });
+  }
+});
+
+// Update user (for toggling admin status)
+app.put("/server/ecommerce/UpdateUser/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { isAdmin } = req.body;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    const result = await usersCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { isAdmin: Boolean(isAdmin), updatedAt: new Date() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+// Delete user
+app.delete("/server/ecommerce/DeleteUser/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ error: "Failed to delete user" });
   }
 });
 

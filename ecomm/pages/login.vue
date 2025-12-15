@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md w-full">
+  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 transition-colors duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden max-w-md w-full border border-gray-200 dark:border-gray-700">
       <!-- Header with decorative element -->
-      <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-center relative">
-        <div class="absolute top-0 left-0 w-full h-1 bg-amber-300"></div>
-        <div class="w-20 h-20 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
+      <div class="bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-700 p-6 text-center relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-amber-300 dark:bg-amber-400"></div>
+        <div class="w-20 h-20 mx-auto mb-4 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center shadow-lg">
           <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
           </svg>
@@ -27,7 +27,7 @@
               v-model="email" 
               type="email" 
               placeholder="Enter your email"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
             />
             <p class="text-red-500 text-sm mt-1 flex items-center" v-if="errors.email">
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -48,7 +48,7 @@
               v-model="password" 
               type="password" 
               placeholder="Enter your password"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
             />
             <p class="text-red-500 text-sm mt-1 flex items-center" v-if="errors.password">
               <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -77,7 +77,7 @@
         <div>
           <button 
             @click="signInWithGoogle"
-            class="w-full border border-gray-300 hover:border-gray-400 bg-white text-gray-700 py-3 px-4 rounded-lg font-medium shadow-sm hover:shadow-md transition duration-200 flex items-center justify-center"
+            class="w-full border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-3 px-4 rounded-lg font-medium shadow-sm hover:shadow-md transition duration-200 flex items-center justify-center"
           >
             <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Additional Links -->
-        <div class="mt-8 text-center text-sm text-gray-600">
+        <div class="mt-8 text-center text-sm text-gray-600 dark:text-gray-300">
           <p>Don't have an account? 
             <NuxtLink to="/signup" class="text-amber-600 hover:text-amber-700 font-medium transition duration-200">Sign up here</NuxtLink>
           </p>
@@ -124,8 +124,23 @@ onAuthStateChanged(auth, (user) => {
   }
 })
 
-// You do not need this separate CheckUser call now, but if you keep it:
-// onMounted(() => CheckUser())
+// Check if user is admin from MongoDB
+async function checkAdminAndRedirect(uid) {
+  try {
+    const response = await $fetch(`http://localhost:2500/server/ecommerce/GetUser/${uid}`)
+    
+    if (response && response.isAdmin === true) {
+      router.replace('/admin')
+      return
+    }
+    
+    router.replace('/')
+  } catch (error) {
+    console.error('Error checking admin status:', error)
+    // If user not found in MongoDB, redirect to home
+    router.replace('/')
+  }
+}
 
 // --- Auth functions (unchanged, but using `auth` above) ---
 async function signInWithGoogle() {
@@ -137,7 +152,7 @@ async function signInWithGoogle() {
     method: "POST",
     body: { uid: user.uid, email: user.email, name: user.displayName }
   })
-  router.replace("/")
+  await checkAdminAndRedirect(user.uid)
 }
 
 async function saveUserInDB(uid, email, name) {
@@ -164,8 +179,8 @@ function validateForm() {
 async function loginManual() {
   if (!validateForm()) return
   try {
-    await signInWithEmailAndPassword(auth, email.value, password.value)
-    router.push("/")
+    const result = await signInWithEmailAndPassword(auth, email.value, password.value)
+    await checkAdminAndRedirect(result.user.uid)
   } catch (err) {
     errors.value.email = "Invalid email or password"
     console.error(err)

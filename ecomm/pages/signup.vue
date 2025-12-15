@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-md w-full">
+  <div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4 transition-colors duration-300">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden max-w-md w-full border border-gray-200 dark:border-gray-700">
       <!-- Header with decorative element -->
-      <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-center relative">
-        <div class="absolute top-0 left-0 w-full h-1 bg-amber-300"></div>
-        <div class="w-20 h-20 mx-auto mb-4 bg-white rounded-full flex items-center justify-center shadow-lg">
+      <div class="bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-700 p-6 text-center relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-amber-300 dark:bg-amber-400"></div>
+        <div class="w-20 h-20 mx-auto mb-4 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center shadow-lg">
           <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
           </svg>
@@ -18,7 +18,7 @@
         <form @submit.prevent="signup" class="space-y-6">
           <!-- Username Field -->
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 flex items-center">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
               <svg class="w-4 h-4 text-amber-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
               </svg>
@@ -27,13 +27,13 @@
             <input 
               v-model="username" 
               placeholder="Choose a username"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
             />
           </div>
 
           <!-- Email Field -->
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 flex items-center">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
               <svg class="w-4 h-4 text-amber-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
               </svg>
@@ -43,13 +43,13 @@
               v-model="email" 
               type="email" 
               placeholder="Enter your email"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
             />
           </div>
 
           <!-- Password Field -->
           <div class="space-y-2">
-            <label class="text-sm font-medium text-gray-700 flex items-center">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
               <svg class="w-4 h-4 text-amber-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
               </svg>
@@ -59,9 +59,9 @@
               v-model="password" 
               type="password" 
               placeholder="Create a password"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
+              class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition duration-200"
             />
-            <p class="text-gray-500 text-xs mt-1">Password must be at least 6 characters</p>
+            <p class="text-gray-500 dark:text-gray-400 text-xs mt-1">Password must be at least 6 characters</p>
           </div>
 
           <!-- Error Message -->
@@ -91,7 +91,7 @@
         </div>
 
         <!-- Alternative Sign In -->
-        <div class="text-center">
+        <div class="text-center dark:text-gray-300">
           <router-link 
             to="/login"
             class="inline-flex items-center text-amber-600 hover:text-amber-700 font-medium transition duration-200"
@@ -104,7 +104,7 @@
         </div>
 
         <!-- Terms -->
-        <p class="mt-8 text-center text-xs text-gray-500">
+        <p class="mt-8 text-center text-xs text-gray-500 dark:text-gray-400">
           By creating an account, you agree to our 
           <a href="#" class="text-amber-600 hover:text-amber-700">Terms of Service</a> 
           and 
