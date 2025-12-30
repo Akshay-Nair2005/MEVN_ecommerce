@@ -142,39 +142,69 @@
           <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number</label>
-                <input v-model="address.phone" placeholder="Enter your phone number" 
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200" />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone Number <span class="text-red-500">*</span></label>
+                <input v-model="address.phone" placeholder="Enter your 10-digit phone number" 
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200',
+                    addressErrors.phone ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  ]" 
+                  @input="validateField('phone')" />
+                <p v-if="addressErrors.phone" class="text-red-500 text-xs mt-1">{{ addressErrors.phone }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pincode</label>
-                <input v-model="address.pincode" placeholder="Enter pincode" 
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200" />
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pincode <span class="text-red-500">*</span></label>
+                <input v-model="address.pincode" placeholder="Enter 6-digit pincode" 
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200',
+                    addressErrors.pincode ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  ]"
+                  @input="validateField('pincode')" />
+                <p v-if="addressErrors.pincode" class="text-red-500 text-xs mt-1">{{ addressErrors.pincode }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">House/Flat No.</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">House/Flat No. <span class="text-red-500">*</span></label>
                 <input v-model="address.house" placeholder="House/Flat number" 
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200" />
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200',
+                    addressErrors.house ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  ]"
+                  @input="validateField('house')" />
+                <p v-if="addressErrors.house" class="text-red-500 text-xs mt-1">{{ addressErrors.house }}</p>
               </div>
               
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Area/Landmark</label>
                 <input v-model="address.area" placeholder="Area, street, landmark" 
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200" />
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200',
+                    addressErrors.area ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  ]"
+                  @input="validateField('area')" />
+                <p v-if="addressErrors.area" class="text-red-500 text-xs mt-1">{{ addressErrors.area }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City <span class="text-red-500">*</span></label>
                 <input v-model="address.city" placeholder="Enter city" 
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200" />
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200',
+                    addressErrors.city ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  ]"
+                  @input="validateField('city')" />
+                <p v-if="addressErrors.city" class="text-red-500 text-xs mt-1">{{ addressErrors.city }}</p>
               </div>
               
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">State <span class="text-red-500">*</span></label>
                 <input v-model="address.state" placeholder="Enter state" 
-                  class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200" />
+                  :class="[
+                    'w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 dark:bg-[#151528] dark:text-white transition duration-200',
+                    addressErrors.state ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'
+                  ]"
+                  @input="validateField('state')" />
+                <p v-if="addressErrors.state" class="text-red-500 text-xs mt-1">{{ addressErrors.state }}</p>
               </div>
             </div>
 
@@ -335,6 +365,15 @@ const address = ref({
   state: ""
 });
 
+const addressErrors = ref({
+  phone: "",
+  pincode: "",
+  house: "",
+  area: "",
+  city: "",
+  state: ""
+});
+
 /* Lifecycle */
 onMounted(() => {
   fetchCartItems();
@@ -396,12 +435,125 @@ const onClickPay = (amount, item) => {
   showPaymentForm.value = false;
 };
 
-/* Validate address fields (simple) */
+/* Validate address fields with regex */
 const validateAddress = () => {
-  if (!address.value.phone || !address.value.pincode || !address.value.house || !address.value.city || !address.value.state) {
-    return "Please complete the shipping address fields.";
+  // Phone number validation: 10 digits (Indian format)
+  const phoneRegex = /^[6-9]\d{9}$/;
+  if (!address.value.phone) {
+    return "Phone number is required.";
   }
+  if (!phoneRegex.test(address.value.phone)) {
+    return "Please enter a valid 10-digit Indian phone number starting with 6-9.";
+  }
+
+  // Pincode validation: 6 digits (Indian format)
+  const pincodeRegex = /^[1-9][0-9]{5}$/;
+  if (!address.value.pincode) {
+    return "Pincode is required.";
+  }
+  if (!pincodeRegex.test(address.value.pincode)) {
+    return "Please enter a valid 6-digit pincode.";
+  }
+
+  // House/Flat number validation: alphanumeric with some special chars
+  const houseRegex = /^[a-zA-Z0-9\s\-\/,\.#]+$/;
+  if (!address.value.house) {
+    return "House/Flat number is required.";
+  }
+  if (!houseRegex.test(address.value.house)) {
+    return "House/Flat number contains invalid characters.";
+  }
+
+  // Area/Landmark validation: letters, numbers, spaces, common punctuation
+  const areaRegex = /^[a-zA-Z0-9\s\-\/,\.#&()]+$/;
+  if (address.value.area && !areaRegex.test(address.value.area)) {
+    return "Area/Landmark contains invalid characters.";
+  }
+
+  // City validation: letters and spaces only
+  const cityRegex = /^[a-zA-Z\s]+$/;
+  if (!address.value.city) {
+    return "City is required.";
+  }
+  if (!cityRegex.test(address.value.city)) {
+    return "City should contain only letters and spaces.";
+  }
+
+  // State validation: letters and spaces only
+  const stateRegex = /^[a-zA-Z\s]+$/;
+  if (!address.value.state) {
+    return "State is required.";
+  }
+  if (!stateRegex.test(address.value.state)) {
+    return "State should contain only letters and spaces.";
+  }
+
   return null;
+};
+
+/* Validate individual fields for real-time feedback */
+const validateField = (field) => {
+  const phoneRegex = /^[6-9]\d{9}$/;
+  const pincodeRegex = /^[1-9][0-9]{5}$/;
+  const houseRegex = /^[a-zA-Z0-9\s\-\/,\.#]+$/;
+  const areaRegex = /^[a-zA-Z0-9\s\-\/,\.#&()]+$/;
+  const cityRegex = /^[a-zA-Z\s]+$/;
+  const stateRegex = /^[a-zA-Z\s]+$/;
+
+  switch (field) {
+    case 'phone':
+      if (!address.value.phone) {
+        addressErrors.value.phone = "";
+      } else if (!phoneRegex.test(address.value.phone)) {
+        addressErrors.value.phone = "Enter valid 10-digit phone (starts with 6-9)";
+      } else {
+        addressErrors.value.phone = "";
+      }
+      break;
+    case 'pincode':
+      if (!address.value.pincode) {
+        addressErrors.value.pincode = "";
+      } else if (!pincodeRegex.test(address.value.pincode)) {
+        addressErrors.value.pincode = "Enter valid 6-digit pincode";
+      } else {
+        addressErrors.value.pincode = "";
+      }
+      break;
+    case 'house':
+      if (!address.value.house) {
+        addressErrors.value.house = "";
+      } else if (!houseRegex.test(address.value.house)) {
+        addressErrors.value.house = "Contains invalid characters";
+      } else {
+        addressErrors.value.house = "";
+      }
+      break;
+    case 'area':
+      if (address.value.area && !areaRegex.test(address.value.area)) {
+        addressErrors.value.area = "Contains invalid characters";
+      } else {
+        addressErrors.value.area = "";
+      }
+      break;
+    case 'city':
+      if (!address.value.city) {
+        addressErrors.value.city = "";
+      } else if (!cityRegex.test(address.value.city)) {
+        addressErrors.value.city = "Use only letters and spaces";
+      } else {
+        addressErrors.value.city = "";
+      }
+      break;
+    case 'state':
+      if (!address.value.state) {
+        addressErrors.value.state = "";
+      } else if (!stateRegex.test(address.value.state)) {
+        addressErrors.value.state = "Use only letters and spaces";
+      } else {
+        addressErrors.value.state = "";
+      }
+      break;
+  }
 };
 
 /* Save address to backend (StoreUser endpoint) */

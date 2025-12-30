@@ -301,7 +301,7 @@ app.delete("/server/ecommerce/DeleteProduct/:id", async (req, res) => {
 });
 
 
-//get orders for a user
+//get orders for a user (excludes delivered orders)
 app.get("/server/ecommerce/GetOrders", async (req, res) => {
   try {
     const uid = req.query.uid;
@@ -310,11 +310,48 @@ app.get("/server/ecommerce/GetOrders", async (req, res) => {
       return res.status(400).json({ error: "Missing uid" });
     }
 
-    const result = await ordersCollection.find({ uid }).toArray();
+    // Filter out delivered orders - only show pending orders to user
+    const result = await ordersCollection.find({ uid, delivered: { $ne: true } }).toArray();
     res.json(result);
   } catch (error) {
     console.error("Error retrieving orders:", error);
     res.status(500).json({ error: "Failed to retrieve orders" });
+  }
+});
+
+// Get ALL orders (for admin panel)
+app.get("/server/ecommerce/GetAllOrders", async (req, res) => {
+  try {
+    const result = await ordersCollection.find().sort().toArray();
+    res.json(result);
+  } catch (error) {
+    console.error("Error retrieving all orders:", error);
+    res.status(500).json({ error: "Failed to retrieve orders" });
+  }
+});
+
+// Mark order as delivered
+app.put("/server/ecommerce/MarkOrderDelivered/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    const result = await ordersCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { delivered: true, deliveredAt: new Date() } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.json({ message: "Order marked as delivered successfully" });
+  } catch (error) {
+    console.error("Error marking order as delivered:", error);
+    res.status(500).json({ error: "Failed to update order" });
   }
 });
 

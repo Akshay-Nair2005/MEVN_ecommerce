@@ -50,6 +50,17 @@
             >
               Users Management
             </button>
+            <button
+              @click="activeTab = 'orders'"
+              :class="[
+                activeTab === 'orders'
+                  ? 'border-purple-600 text-purple-600 dark:text-purple-400'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200'
+              ]"
+            >
+              Orders Management
+            </button>
           </nav>
         </div>
       </div>
@@ -81,7 +92,7 @@
               <h3 class="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">{{ product.title }}</h3>
               <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{{ product.description }}</p>
               <div class="flex items-center justify-between mb-4">
-                <span class="text-lg font-bold text-purple-600 dark:text-purple-400">${{ product.price }}</span>
+                <span class="text-lg font-bold text-purple-600 dark:text-purple-400">₹{{ product.price }}</span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">{{ product.category }}</span>
               </div>
               <div class="flex space-x-2">
@@ -150,6 +161,81 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- Orders Tab -->
+      <div v-if="activeTab === 'orders'" class="space-y-6">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">All Orders ({{ orders.length }})</h2>
+          <button
+            @click="loadOrders"
+            :disabled="ordersLoading"
+            class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg transition-colors duration-200 disabled:opacity-50"
+          >
+            {{ ordersLoading ? 'Loading...' : 'Refresh Orders' }}
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="ordersLoading" class="p-8 text-center">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-purple-500 border-t-transparent"></div>
+          <p class="mt-4 text-gray-600 dark:text-gray-400">Loading orders...</p>
+        </div>
+        
+        <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead class="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product ID</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order Date</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tr v-for="order in orders" :key="order._id">
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-mono">{{ order._id?.slice(-8) || 'N/A' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-mono" :title="order.uid">{{ order.uid ? order.uid.slice(0, 10) + '...' : 'N/A' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ order.productId || 'N/A' }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ order.quantity || 1 }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ formatDate(order.createdAt) }}</td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span
+                      :class="[
+                        order.delivered
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                        'px-2 inline-flex text-xs leading-5 font-semibold rounded-full'
+                      ]"
+                    >
+                      {{ order.delivered ? 'Delivered' : 'Pending' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <button
+                      v-if="!order.delivered"
+                      @click="markAsDelivered(order._id)"
+                      class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white rounded-lg text-sm font-medium transition-colors duration-200"
+                    >
+                      Mark Delivered
+                    </button>
+                    <span v-else class="text-gray-500 dark:text-gray-400 text-sm">
+                      ✓ Completed
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div v-if="orders.length === 0" class="p-8 text-center text-gray-500 dark:text-gray-400">
+            No orders found. Orders will appear here when users make purchases.
+          </div>
         </div>
       </div>
     </main>
@@ -293,6 +379,8 @@ const router = useRouter()
 const activeTab = ref('products')
 const products = ref([])
 const users = ref([])
+const orders = ref([])
+const ordersLoading = ref(false)
 const showProductModal = ref(false)
 const editingProduct = ref(null)
 
@@ -328,6 +416,7 @@ onMounted(async () => {
       // Load data
       await loadProducts()
       await loadUsers()
+      await loadOrders()
     } catch (error) {
       console.error('Error checking admin status:', error)
       router.replace('/')
@@ -350,6 +439,46 @@ async function loadUsers() {
     users.value = response
   } catch (error) {
     console.error('Error loading users:', error)
+  }
+}
+
+async function loadOrders() {
+  ordersLoading.value = true
+  try {
+    console.log('Loading all orders...')
+    const response = await $fetch('http://localhost:2500/server/ecommerce/GetAllOrders')
+    console.log('Orders received:', response)
+    orders.value = response || []
+  } catch (error) {
+    console.error('Error loading orders:', error)
+    orders.value = []
+  } finally {
+    ordersLoading.value = false
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'N/A'
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+async function markAsDelivered(orderId) {
+  if (!confirm('Mark this order as delivered? This will remove it from the user\'s orders page.')) return
+
+  try {
+    await $fetch(`http://localhost:2500/server/ecommerce/MarkOrderDelivered/${orderId}`, {
+      method: 'PUT'
+    })
+    await loadOrders()
+  } catch (error) {
+    console.error('Error marking order as delivered:', error)
+    alert('Failed to mark order as delivered')
   }
 }
 

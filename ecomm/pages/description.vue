@@ -85,9 +85,9 @@
             <!-- Price -->
             <div class="flex items-center gap-4">
               <div class="text-5xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                ${{ product.price }}
+                ₹{{ product.price }}
               </div>
-              <div class="text-2xl text-gray-400 line-through">${{ (product.price * 1.2).toFixed(2) }}</div>
+              <div class="text-2xl text-gray-400 line-through">₹{{ (product.price * 1.2).toFixed(2) }}</div>
               <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-bold rounded-full text-sm">
                 Save 20%
               </span>
@@ -169,7 +169,7 @@
                   </button>
                 </div>
                 <div class="text-lg text-gray-600 dark:text-gray-400">
-                  Total: <span class="font-bold text-amber-600">${{ (product.price * quantity).toFixed(2) }}</span>
+                  Total: <span class="font-bold text-amber-600">₹{{ (product.price * quantity).toFixed(2) }}</span>
                 </div>
               </div>
             </div>
@@ -183,7 +183,7 @@
                 <svg class="w-6 h-6 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Add to Cart • ${{ (product.price * quantity).toFixed(2) }}
+                Add to Cart • ₹{{ (product.price * quantity).toFixed(2) }}
               </button>
               
               <NuxtLink
@@ -251,7 +251,7 @@
 
               <div class="flex items-center justify-between">
                 <div class="text-2xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                  ${{ item.price }}
+                  ₹{{ item.price }}
                 </div>
                 <NuxtLink
                   :to="`/description?id=${item.id}`"

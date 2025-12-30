@@ -142,7 +142,7 @@
                     <p class="text-lg opacity-90 mb-6 line-clamp-2">{{ f.description }}</p>
 
                     <div class="flex items-center gap-4">
-                      <div class="text-3xl font-bold text-amber-300">${{ f.price }}</div>
+                      <div class="text-3xl font-bold text-amber-300">₹{{ f.price }}</div>
 
                       <NuxtLink :to="`/description?id=${f.id}`"
                         class="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-semibold shadow-lg transform hover:scale-105 transition-all duration-300">
@@ -312,7 +312,7 @@
 
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">${{ item.price }}</div>
+                  <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">₹{{ item.price }}</div>
                   <div class="flex items-center gap-1 mt-1">
                     <div class="flex text-amber-400">
                       <span v-for="star in 5" :key="star">★</span>

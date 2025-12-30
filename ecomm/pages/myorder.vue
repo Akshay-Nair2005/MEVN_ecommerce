@@ -1,46 +1,47 @@
 <template>
-  <div class="order-page bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-8 px-4">
+  <Navbar />
+  <div class="order-page bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 min-h-screen py-8 px-4">
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
       <div class="mb-8 text-center">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent mb-2">
           My Orders
         </h1>
-        <p class="text-gray-600">View and manage your purchase history</p>
+        <p class="text-gray-600 dark:text-gray-400">View and manage your purchase history</p>
       </div>
 
       <!-- Loading state -->
-      <div v-if="loading" class="state-card animate-pulse">
+      <div v-if="loading" class="state-card dark:bg-gray-800 dark:border-gray-700 animate-pulse">
         <div class="flex items-center justify-center space-x-2">
           <div class="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-bounce"></div>
           <div class="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-bounce delay-100"></div>
           <div class="w-4 h-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-bounce delay-200"></div>
         </div>
-        <p class="mt-4 text-gray-600">Loading your orders...</p>
+        <p class="mt-4 text-gray-600 dark:text-gray-400">Loading your orders...</p>
       </div>
 
       <!-- Error state -->
-      <div v-else-if="error" class="state-card border-l-4 border-red-500 bg-red-50">
+      <div v-else-if="error" class="state-card dark:bg-gray-800 border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20">
         <div class="flex items-center">
           <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
-            <p class="font-semibold text-red-800">Error loading orders</p>
-            <p class="text-red-600">{{ error }}</p>
+            <p class="font-semibold text-red-800 dark:text-red-400">Error loading orders</p>
+            <p class="text-red-600 dark:text-red-300">{{ error }}</p>
           </div>
         </div>
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="groupedOrders.length === 0" class="state-card text-center">
-        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
+      <div v-else-if="groupedOrders.length === 0" class="state-card dark:bg-gray-800 dark:border-gray-700 text-center">
+        <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30 rounded-full flex items-center justify-center">
           <svg class="w-12 h-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-gray-800 mb-2">No orders yet</h3>
-        <p class="text-gray-600 mb-6">Start shopping to see your orders here</p>
+        <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">No orders yet</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">Start shopping to see your orders here</p>
         <NuxtLink to="/" class="btn-primary">
           Start Shopping
         </NuxtLink>
@@ -51,26 +52,35 @@
         <div
           v-for="group in groupedOrders"
           :key="group.key"
-          class="order-group-card"
-          :class="group.isGroup ? 'border-blue-200 bg-gradient-to-r from-blue-50/50 to-indigo-50/50' : 'border-green-200 bg-gradient-to-r from-emerald-50/50 to-green-50/50'"
+          class="order-group-card dark:bg-gray-800 dark:border-gray-700"
+          :class="group.isGroup ? 'border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/20 dark:to-indigo-900/20' : 'border-green-200 dark:border-green-800 bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-emerald-900/20 dark:to-green-900/20'"
         >
           <!-- Group header -->
-          <div class="order-group-header">
+          <div class="order-group-header dark:border-gray-700">
             <div>
               <div class="flex items-center gap-3 mb-2">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold"
-                      :class="group.isGroup ? 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700' : 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-700'">
+                      :class="group.isGroup ? 'bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 text-blue-700 dark:text-blue-300' : 'bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900 dark:to-green-900 text-emerald-700 dark:text-emerald-300'">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path v-if="group.isGroup" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                   {{ group.isGroup ? 'Group Payment' : 'Individual Order' }}
                 </span>
-                <span class="text-sm text-gray-500">Order #{{ group.key.slice(0, 10) }}</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Order #{{ group.key.slice(0, 10) }}</span>
               </div>
-              <h2 class="text-xl font-bold text-gray-900">
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white">
                 {{ formatDate(group.createdAt) }}
               </h2>
+              <!-- Delivery Date -->
+              <div class="mt-2 flex items-center gap-2 text-sm">
+                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                <span class="text-green-600 dark:text-green-400 font-medium">
+                  Expected Delivery: {{ getDeliveryDate(group.createdAt) }}
+                </span>
+              </div>
             </div>
 
             <button @click="downloadInvoice(group)" class="btn-primary flex items-center gap-2">
@@ -86,19 +96,19 @@
             <div
               v-for="order in group.orders"
               :key="order._id || order.productId + '-' + order.createdAt"
-              class="order-item-card"
+              class="order-item-card dark:bg-gray-700 dark:border-gray-600"
             >
               <div class="flex items-start gap-4">
                 <!-- Product image -->
                 <div class="flex-shrink-0">
-                  <div class="w-20 h-20 rounded-lg overflow-hidden bg-white border border-gray-200 p-1">
+                  <div class="w-20 h-20 rounded-lg overflow-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 p-1">
                     <img
                       v-if="order.product?.image"
                       :src="order.product.image"
                       :alt="order.product.title"
                       class="w-full h-full object-contain"
                     />
-                    <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50">
+                    <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30">
                       <svg class="w-8 h-8 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
@@ -110,20 +120,20 @@
                 <div class="flex-grow">
                   <div class="flex justify-between items-start">
                     <div>
-                      <h3 class="font-semibold text-gray-900 text-lg mb-1">
+                      <h3 class="font-semibold text-gray-900 dark:text-white text-lg mb-1">
                         {{ order.product?.title || 'Product Unavailable' }}
                       </h3>
-                      <p class="text-sm text-gray-500 mb-2">Product ID: {{ order.productId }}</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Product ID: {{ order.productId }}</p>
                     </div>
                     <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">
-                        ${{ order.product ? (order.product.price * order.quantity).toFixed(2) : '0.00' }}
+                      <p class="text-lg font-bold text-gray-900 dark:text-white">
+                        ₹{{ order.product ? (order.product.price * order.quantity).toFixed(2) : '0.00' }}
                       </p>
-                      <p class="text-sm text-gray-500">{{ order.quantity }} × ${{ order.product?.price?.toFixed(2) || '0.00' }}</p>
+                      <p class="text-sm text-gray-500 dark:text-gray-400">{{ order.quantity }} × ₹{{ order.product?.price?.toFixed(2) || '0.00' }}</p>
                     </div>
                   </div>
                   
-                  <div v-if="!order.product" class="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-red-100 to-pink-100 text-red-700 text-sm">
+                  <div v-if="!order.product" class="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 text-red-700 dark:text-red-400 text-sm">
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                     </svg>
@@ -135,11 +145,11 @@
           </div>
 
           <!-- Group total -->
-          <div class="mt-6 pt-6 border-t border-gray-200">
+          <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
             <div class="flex justify-between items-center">
               <div>
-                <p class="text-gray-600">Payment status</p>
-                <p class="text-sm font-medium text-green-600 flex items-center">
+                <p class="text-gray-600 dark:text-gray-400">Payment status</p>
+                <p class="text-sm font-medium text-green-600 dark:text-green-400 flex items-center">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
@@ -147,9 +157,9 @@
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 mb-1">Total amount</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total amount</p>
                 <p class="text-2xl font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-                  ${{ group.grandTotal.toFixed(2) }}
+                  ₹{{ group.grandTotal.toFixed(2) }}
                 </p>
               </div>
             </div>
@@ -279,6 +289,20 @@ const formatDate = (dateStr) => {
   })
 }
 
+// Get delivery date (7 days from order date)
+const getDeliveryDate = (dateStr) => {
+  if (!dateStr) return '-'
+  const orderDate = new Date(dateStr)
+  const deliveryDate = new Date(orderDate)
+  deliveryDate.setDate(deliveryDate.getDate() + 7)
+  return deliveryDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+}
+
 // Enhanced PDF generation
 const downloadInvoice = async (group) => {
   const { jsPDF } = await import('jspdf')
@@ -358,8 +382,8 @@ const downloadInvoice = async (group) => {
     const qtyY = y + (textHeight > 10 ? textHeight - 10 : 0)
     
     doc.text(qty.toString(), 120, qtyY)
-    doc.text(`$${price}`, 140, qtyY)
-    doc.text(`$${lineTotal}`, 175, qtyY)
+    doc.text(`Rs.${price}`, 140, qtyY)
+    doc.text(`Rs.${lineTotal}`, 175, qtyY)
 
     y += Math.max(15, textHeight + 5)
 
@@ -380,12 +404,12 @@ const downloadInvoice = async (group) => {
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(12)
   doc.text('Subtotal:', 140, y)
-  doc.text(`$${group.grandTotal.toFixed(2)}`, 175, y, { align: 'right' })
+  doc.text(`Rs.${group.grandTotal.toFixed(2)}`, 175, y, { align: 'right' })
   
   y += 8
   doc.text('Total:', 140, y)
   doc.setFontSize(14)
-  doc.text(`$${group.grandTotal.toFixed(2)}`, 175, y, { align: 'right' })
+  doc.text(`Rs.${group.grandTotal.toFixed(2)}`, 175, y, { align: 'right' })
 
   // Footer
   doc.setFontSize(9)
@@ -421,6 +445,23 @@ const downloadInvoice = async (group) => {
   @apply bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md hover:shadow-lg;
 }
 
+/* Dark mode overrides */
+:deep(.dark) .state-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+:deep(.dark) .order-group-card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+:deep(.dark) .order-group-header {
+  @apply border-gray-700;
+}
+
+:deep(.dark) .order-item-card {
+  @apply bg-gray-700 border-gray-600 hover:border-amber-500;
+}
+
 /* Custom scrollbar */
 .order-page ::-webkit-scrollbar {
   width: 8px;
@@ -428,6 +469,10 @@ const downloadInvoice = async (group) => {
 
 .order-page ::-webkit-scrollbar-track {
   @apply bg-gray-100 rounded-full;
+}
+
+:deep(.dark) .order-page ::-webkit-scrollbar-track {
+  @apply bg-gray-800;
 }
 
 .order-page ::-webkit-scrollbar-thumb {

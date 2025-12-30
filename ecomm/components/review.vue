@@ -48,7 +48,7 @@
                                     <p class="text-white-400 mt-2">{{ selectedProduct.description || 'No description available' }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-3xl font-bold text-white-400">${{ selectedProduct.price ? selectedProduct.price.toFixed(2) : '0.00' }}</div>
+                                    <div class="text-3xl font-bold text-white-400">₹{{ selectedProduct.price ? selectedProduct.price.toFixed(2) : '0.00' }}</div>
                                     <div class="flex items-center mt-2">
                                         <div class="flex">
                                             <div v-for="i in 5" :key="i" class="w-5 h-5">
@@ -268,7 +268,7 @@
                             </div>
                             <div class="flex-1 text-left">
                                 <div class="font-medium text-white truncate">{{ product.title }}</div>
-                                <div class="text-sm text-white">${{ product.price ? product.price.toFixed(2) : '0.00' }}</div>
+                                <div class="text-sm text-white">₹{{ product.price ? product.price.toFixed(2) : '0.00' }}</div>
                             </div>
                             <div class="flex items-center">
                                 <div v-for="i in 5" :key="i" class="w-3 h-3">
