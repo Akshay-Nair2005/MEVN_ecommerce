@@ -28,6 +28,7 @@ let cartCollection;    // your "ecommercec" collection
 let usersCollection;
 let ordersCollection;
 let productsCollection;
+let reviewsCollection;
 
 
 // ----- CONNECT TO MONGODB -----
@@ -45,6 +46,7 @@ async function connectDB() {
     usersCollection = database.collection("users");
     ordersCollection = database.collection("orders");
     productsCollection = database.collection("products");
+    reviewsCollection = database.collection("reviews");
 
     console.log("✅ Connected to MongoDB:", DB_NAME);
 
@@ -559,6 +561,119 @@ app.post("/server/ecommerce/AddOrder", async (req, res) => {
 });
 
 
+
+// ===================================================
+//                  REVIEWS MANAGEMENT
+// ===================================================
+
+// Get reviews for a product
+app.get("/server/ecommerce/GetReviews/:productId", async (req, res) => {
+  try {
+    const productId = Number(req.params.productId);
+
+    if (isNaN(productId)) {
+      return res.status(400).json({ error: "Product ID must be a number" });
+    }
+
+    const reviews = await reviewsCollection.find({ productId }).sort({ createdAt: -1 }).toArray();
+    res.json(reviews);
+  } catch (error) {
+    console.error("Error retrieving reviews:", error);
+    res.status(500).json({ error: "Failed to retrieve reviews" });
+  }
+});
+
+// Add a review
+app.post("/server/ecommerce/AddReview", async (req, res) => {
+  try {
+    const { productId, uid, author, rating, title, content, verified } = req.body;
+
+    if (!productId || !author || !rating || !title || !content) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const newReview = {
+      productId: Number(productId),
+      uid: uid || null,
+      author,
+      rating: Number(rating),
+      title,
+      content,
+      verified: Boolean(verified),
+      helpful: 0,
+      unhelpful: 0,
+      comments: [],
+      createdAt: new Date(),
+    };
+
+    const result = await reviewsCollection.insertOne(newReview);
+    res.status(201).json({ message: "Review added successfully", id: result.insertedId, review: newReview });
+  } catch (error) {
+    console.error("Error adding review:", error);
+    res.status(500).json({ error: "Failed to add review" });
+  }
+});
+
+// Update helpful/unhelpful count
+app.put("/server/ecommerce/UpdateReviewHelpful/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { type, increment } = req.body; // type: 'helpful' or 'unhelpful', increment: true or false
+
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid ID format" });
+    }
+
+    const updateField = type === "helpful" ? "helpful" : "unhelpful";
+    const updateValue = increment ? 1 : -1;
+
+    const result = await reviewsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $inc: { [updateField]: updateValue } }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "Review not found" });
+    }
+
+    res.json({ message: "Review updated successfully" });
+  } catch (error) {
+    console.error("Error updating review:", error);
+    res.status(500).json({ error: "Failed to update review" });
+  }
+});
+
+// Get similar products based on category
+app.get("/server/ecommerce/GetSimilarProducts/:productId", async (req, res) => {
+  try {
+    const productId = Number(req.params.productId);
+
+    if (isNaN(productId)) {
+      return res.status(400).json({ error: "Product ID must be a number" });
+    }
+
+    // Get current product
+    const currentProduct = await productsCollection.findOne({ id: productId });
+
+    if (!currentProduct) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    // Find similar products (same category, exclude current product)
+    const similarProducts = await productsCollection
+      .find({
+        category: currentProduct.category,
+        id: { $ne: productId }
+      })
+      .limit(4)
+      .toArray();
+
+    res.json(similarProducts);
+  } catch (error) {
+    console.error("Error retrieving similar products:", error);
+    res.status(500).json({ error: "Failed to retrieve similar products" });
+  }
+});
 
 app.get("/", (req, res) => {
   res.send("Ecommerce API is running ✅");

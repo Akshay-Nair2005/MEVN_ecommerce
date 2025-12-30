@@ -36,6 +36,14 @@
           >
             📦 My Orders
           </NuxtLink>
+          
+          <NuxtLink 
+            v-if="currentUser && isAdmin" 
+            to="/admin" 
+            class="text-gray-700 dark:text-gray-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors duration-200"
+          >
+            👑 Admin Panel
+          </NuxtLink>
         </div>
 
         <!-- Right Icons + Theme -->
@@ -105,6 +113,9 @@ const toast = useToast();
 const cartItems = ref([]);
 const cartCount = computed(() => cartItems.value.length);
 
+// --- ADMIN state ---
+const isAdmin = ref(false);
+
 // derived uid (safe)
 const userUid = computed(() => currentUser.value?.uid || null);
 
@@ -145,14 +156,47 @@ const fetchCartItems = async () => {
   }
 };
 
+// fetch admin status from database
+const fetchAdminStatus = async () => {
+  try {
+    if (!userUid.value) {
+      isAdmin.value = false;
+      return;
+    }
+
+    const resp = await fetch(`http://localhost:2500/server/ecommerce/GetUser/${encodeURIComponent(userUid.value)}`);
+    if (!resp.ok) {
+      console.log("User not found in database, not an admin");
+      isAdmin.value = false;
+      return;
+    }
+    
+    const data = await resp.json();
+    console.log("User data from DB:", data);
+    isAdmin.value = data.isAdmin === true;
+  } catch (err) {
+    console.error("Error fetching admin status:", err);
+    isAdmin.value = false;
+  }
+};
+
 // Fetch when UID becomes available (and also on mount if already available)
 watch(userUid, (val) => {
-  if (val) fetchCartItems();
+  if (val) {
+    fetchCartItems();
+    fetchAdminStatus();
+  } else {
+    isAdmin.value = false;
+  }
 }, { immediate: true });
 
 // Optionally keep a safety onMounted call (will do nothing if uid not present)
-onMounted(() => {
-  if (userUid.value) fetchCartItems();
+  isAdmin.value = false; // clear admin status when logged out
+  onMounted(() => {
+  if (userUid.value) {
+    fetchCartItems();
+    fetchAdminStatus();
+  }
 });
 
 // --- Auth handling (keeps currentUser in sync) ---

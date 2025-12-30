@@ -31,7 +31,7 @@
             <!-- Left Column: Product Info & Reviews -->
             <div class="lg:w-2/3">
                 <!-- Product Info Card -->
-                <div class="bg-transparent rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
+                <div v-if="selectedProduct" class="bg-transparent rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
                     <div class="flex flex-col md:flex-row gap-6">
                         <!-- Product Image -->
                         <div class="md:w-1/3">
@@ -44,20 +44,20 @@
                         <div class="md:w-2/3">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <h2 class="text-2xl font-bold text-gray-900">{{ selectedProduct.title }}</h2>
-                                    <p class="text-gray-600 mt-2">{{ selectedProduct.description }}</p>
+                                    <h2 class="text-2xl font-bold text-white-400">{{ selectedProduct.title }}</h2>
+                                    <p class="text-white-400 mt-2">{{ selectedProduct.description || 'No description available' }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-3xl font-bold text-gray-900">${{ selectedProduct.price.toFixed(2) }}</div>
+                                    <div class="text-3xl font-bold text-white-400">${{ selectedProduct.price ? selectedProduct.price.toFixed(2) : '0.00' }}</div>
                                     <div class="flex items-center mt-2">
                                         <div class="flex">
                                             <div v-for="i in 5" :key="i" class="w-5 h-5">
-                                                <svg :class="i <= selectedProduct.rating ? 'text-amber-500' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
+                                                <svg :class="i <= (selectedProduct.rating?.rate || 0) ? 'text-amber-500' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                                 </svg>
                                             </div>
                                         </div>
-                                        <span class="ml-2 text-gray-600">({{ selectedProduct.reviewCount }})</span>
+                                        <span class="ml-2 text-gray-600">({{ reviewCount }})</span>
                                     </div>
                                 </div>
                             </div>
@@ -65,30 +65,35 @@
                             <!-- Product Stats -->
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                                 <div class="text-center p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
-                                    <div class="text-xl font-bold text-gray-900">{{ reviews.length }}</div>
+                                    <div class="text-xl font-bold text-white-400">{{ reviews.length }}</div>
                                     <div class="text-sm text-gray-600">Total Reviews</div>
                                 </div>
                                 <div class="text-center p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
-                                    <div class="text-xl font-bold text-gray-900">{{ helpfulReviews }}</div>
+                                    <div class="text-xl font-bold text-white-400">{{ helpfulReviews }}</div>
                                     <div class="text-sm text-gray-600">Helpful Reviews</div>
                                 </div>
                                 <div class="text-center p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg">
-                                    <div class="text-xl font-bold text-gray-900">{{ averageRating.toFixed(1) }}</div>
+                                    <div class="text-xl font-bold text-white-400">{{ averageRating }}</div>
                                     <div class="text-sm text-gray-600">Avg Rating</div>
                                 </div>
                                 <div class="text-center p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
-                                    <div class="text-xl font-bold text-gray-900">{{ verifiedPurchases }}</div>
+                                    <div class="text-xl font-bold text-white-400">{{ verifiedPurchases }}</div>
                                     <div class="text-sm text-gray-600">Verified Buyers</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <!-- No Product Selected -->
+                <div v-else class="bg-transparent rounded-2xl shadow-lg p-12 mb-6 border border-gray-200 text-center">
+                    <p class="text-gray-500 text-lg">Please select a product to view reviews</p>
+                </div>
 
                 <!-- Reviews List -->
                 <div class="bg-transparent rounded-2xl shadow-lg p-6 border border-gray-200">
                     <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-bold text-gray-900">Customer Reviews</h3>
+                        <h3 class="text-xl font-bold text-white-400">Customer Reviews ({{ reviewCount }})</h3>
                         <div class="flex items-center space-x-2">
                             <button 
                                 v-for="filter in filters" 
@@ -104,10 +109,34 @@
                         </div>
                     </div>
 
-                    <div class="space-y-6">
+                    <!-- Loading state -->
+                    <div v-if="loading.reviews" class="space-y-6">
+                        <div v-for="i in 3" :key="i" class="skeleton h-32 rounded-xl"></div>
+                    </div>
+                    
+                    <!-- Error state -->
+                    <div v-else-if="errors.reviews" class="text-center py-12">
+                        <svg class="w-16 h-16 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-red-500 text-lg mb-2">{{ errors.reviews }}</p>
+                        <button @click="fetchReviews" class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Retry</button>
+                    </div>
+                    
+                    <!-- Empty state -->
+                    <div v-else-if="filteredReviews.length === 0" class="text-center py-12">
+                        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                        </svg>
+                        <p class="text-gray-500 text-lg">No reviews yet</p>
+                        <p class="text-gray-400 text-sm mt-2">Be the first to review this product!</p>
+                    </div>
+
+                    <!-- Reviews -->
+                    <div v-else class="space-y-6">
                         <div 
                             v-for="(review, index) in filteredReviews" 
-                            :key="index" 
+                            :key="review._id || index" 
                             class="bg-gradient-to-r  rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 p-5"
                         >
                             <!-- Review Header -->
@@ -117,7 +146,7 @@
                                         {{ review.author.charAt(0) }}
                                     </div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 dark:text-white">{{ review.author }}</h4>
+                                        <h4 class="font-bold text-white-400 dark:text-white">{{ review.author }}</h4>
                                         <div class="flex items-center space-x-2 mt-1">
                                             <div class="flex">
                                                 <div v-for="i in 5" :key="i" class="w-4 h-4">
@@ -126,7 +155,7 @@
                                                     </svg>
                                                 </div>
                                             </div>
-                                            <span class="text-sm text-gray-500">{{ formatDate(review.date) }}</span>
+                                            <span class="text-sm text-white-400">{{ formatDate(review.date) }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -140,8 +169,8 @@
 
                             <!-- Review Content -->
                             <div class="mb-4">
-                                <h5 class="font-semibold text-gray-900 mb-2">{{ review.title }}</h5>
-                                <p class="text-gray-700 leading-relaxed">{{ review.content }}</p>
+                                <h5 class="font-semibold text-white-400 mb-2">{{ review.title }}</h5>
+                                <p class="text-white-400 leading-relaxed">{{ review.content }}</p>
                             </div>
 
                             <!-- Review Actions -->
@@ -207,29 +236,46 @@
             <div class="lg:w-1/3">
                 <!-- Product Selector -->
                 <div class="bg-transparent rounded-2xl shadow-lg p-6 mb-6 border border-gray-200">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Select Product</h3>
-                    <div class="space-y-3">
+                    <h3 class="text-lg font-bold text-white-400 mb-4">Select Product</h3>
+                    
+                    <!-- Loading state -->
+                    <div v-if="loading.products" class="space-y-3">
+                        <div v-for="i in 3" :key="i" class="skeleton h-16 rounded-lg"></div>
+                    </div>
+                    
+                    <!-- Error state -->
+                    <div v-else-if="errors.products" class="text-center py-8">
+                        <p class="text-red-500 text-sm">{{ errors.products }}</p>
+                        <button @click="fetchProducts" class="mt-2 text-blue-600 hover:text-blue-700 text-sm">Retry</button>
+                    </div>
+                    
+                    <!-- Empty state -->
+                    <div v-else-if="products.length === 0" class="text-center py-8">
+                        <p class="text-gray-500 text-sm">No products available</p>
+                    </div>
+                    
+                    <!-- Products list -->
+                    <div v-else class="space-y-3">
                         <button
                             v-for="product in products"
                             :key="product.id"
                             @click="selectProduct(product)"
                             class="w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 hover:bg-gray-50"
-                            :class="selectedProduct.id === product.id ? 'bg-gradient-to-r from-amber-50 to-orange-50 ring-2 ring-amber-200' : ''"
+                            :class="selectedProduct && selectedProduct.id === product.id ? 'bg-gradient-to-r from-amber-50 to-orange-50 ring-2 ring-amber-200' : ''"
                         >
                             <div class="w-12 h-12 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg p-2">
                                 <img :src="product.image" :alt="product.title" class="w-full h-full object-contain">
                             </div>
                             <div class="flex-1 text-left">
-                                <div class="font-medium text-gray-900 truncate">{{ product.title }}</div>
-                                <div class="text-sm text-gray-600">${{ product.price.toFixed(2) }}</div>
+                                <div class="font-medium text-white truncate">{{ product.title }}</div>
+                                <div class="text-sm text-white">${{ product.price ? product.price.toFixed(2) : '0.00' }}</div>
                             </div>
                             <div class="flex items-center">
                                 <div v-for="i in 5" :key="i" class="w-3 h-3">
-                                    <svg :class="i <= product.rating ? 'text-amber-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
+                                    <svg :class="i <= (product.rating?.rate || 0) ? 'text-amber-400' : 'text-gray-300'" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                                     </svg>
                                 </div>
-                                <span class="text-xs text-gray-500 ml-1">({{ product.reviewCount }})</span>
                             </div>
                         </button>
                     </div>
@@ -243,7 +289,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </div>
-                        <h2 class="text-2xl font-bold text-gray-900">Write a Review</h2>
+                        <h2 class="text-2xl font-bold text-white-400">Write a Review</h2>
                         <p class="text-gray-600 mt-2">Share your experience with this product</p>
                     </div>
 
@@ -341,106 +387,15 @@
 </template>
 
 <script>
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+
 export default {
     data() {
         return {
-            selectedProduct: {
-                id: 1,
-                title: "Premium Wireless Headphones",
-                description: "Noise-cancelling wireless headphones with 30-hour battery life",
-                price: 249.99,
-                rating: 4.5,
-                reviewCount: 128,
-                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
-            },
-            products: [
-                {
-                    id: 1,
-                    title: "Premium Wireless Headphones",
-                    price: 249.99,
-                    rating: 4.5,
-                    reviewCount: 128,
-                    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w-400"
-                },
-                {
-                    id: 2,
-                    title: "Smart Watch Pro",
-                    price: 399.99,
-                    rating: 4.7,
-                    reviewCount: 89,
-                    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400"
-                },
-                {
-                    id: 3,
-                    title: "Ultra HD 4K Camera",
-                    price: 1299.99,
-                    rating: 4.8,
-                    reviewCount: 45,
-                    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400"
-                },
-                {
-                    id: 4,
-                    title: "Gaming Laptop",
-                    price: 1799.99,
-                    rating: 4.6,
-                    reviewCount: 67,
-                    image: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400"
-                }
-            ],
-            reviews: [
-                {
-                    author: "Alex Johnson",
-                    rating: 5,
-                    title: "Best headphones I've ever owned!",
-                    content: "The sound quality is incredible and the noise cancellation works perfectly. Battery life lasts me through multiple days of use.",
-                    date: "2024-01-15",
-                    verified: true,
-                    helpful: 42,
-                    unhelpful: 2,
-                    helpfulActive: false,
-                    unhelpfulActive: false,
-                    comments: ["Thank you for your detailed review! We're glad you're enjoying the headphones."]
-                },
-                {
-                    author: "Sarah Miller",
-                    rating: 4,
-                    title: "Great sound, comfortable fit",
-                    content: "Very comfortable for long listening sessions. The only downside is the case could be more compact for travel.",
-                    date: "2024-01-10",
-                    verified: true,
-                    helpful: 28,
-                    unhelpful: 5,
-                    helpfulActive: false,
-                    unhelpfulActive: false,
-                    comments: []
-                },
-                {
-                    author: "Mike Chen",
-                    rating: 5,
-                    title: "Worth every penny",
-                    content: "The sound isolation is amazing. I use them for work calls and the microphone quality is crystal clear.",
-                    date: "2024-01-05",
-                    verified: true,
-                    helpful: 35,
-                    unhelpful: 1,
-                    helpfulActive: false,
-                    unhelpfulActive: false,
-                    comments: []
-                },
-                {
-                    author: "Jessica Brown",
-                    rating: 3,
-                    title: "Good but has connectivity issues",
-                    content: "Sound quality is great when it works, but I've had some Bluetooth connectivity problems with my phone.",
-                    date: "2023-12-28",
-                    verified: false,
-                    helpful: 12,
-                    unhelpful: 8,
-                    helpfulActive: false,
-                    unhelpfulActive: false,
-                    comments: ["We're sorry to hear about the connectivity issues. Please contact our support team for assistance."]
-                }
-            ],
+            selectedProduct: null,
+            products: [],
+            similarProducts: [],
+            reviews: [],
             newReview: {
                 title: "",
                 author: "",
@@ -449,14 +404,39 @@ export default {
                 verified: false
             },
             filters: ["All", "5 Stars", "4 Stars", "3 Stars", "Verified"],
-            activeFilter: "All"
+            activeFilter: "All",
+            loading: {
+                products: false,
+                reviews: false,
+                similarProducts: false,
+                submitting: false
+            },
+            errors: {
+                products: null,
+                reviews: null,
+                similarProducts: null,
+                submit: null
+            },
+            currentUser: null
         };
+    },
+    mounted(){
+        this.setupAuth();
+        this.fetchProducts();   
+    },
+    watch: {
+        selectedProduct(newProduct) {
+            if (newProduct) {
+                this.fetchReviews();
+                this.fetchSimilarProducts();
+            }
+        }
     },
     computed: {
         averageRating() {
             if (this.reviews.length === 0) return 0;
             const sum = this.reviews.reduce((total, review) => total + review.rating, 0);
-            return sum / this.reviews.length;
+            return (sum / this.reviews.length).toFixed(1);
         },
         helpfulReviews() {
             return this.reviews.filter(r => r.helpful > 5).length;
@@ -471,79 +451,206 @@ export default {
             if (this.activeFilter === "4 Stars") return this.reviews.filter(r => r.rating === 4);
             if (this.activeFilter === "3 Stars") return this.reviews.filter(r => r.rating === 3);
             return this.reviews;
+        },
+        reviewCount() {
+            return this.reviews.length;
         }
     },
+    
     methods: {
+        setupAuth() {
+            const auth = getAuth();
+            onAuthStateChanged(auth, (user) => {
+                this.currentUser = user;
+                if (user) {
+                    this.newReview.author = user.displayName || user.email || "";
+                }
+            });
+        },
+        
         selectProduct(product) {
             this.selectedProduct = product;
-            // In a real app, you would fetch reviews for this product
         },
-        submitReview() {
+        
+        async fetchProducts() {
+            this.loading.products = true;
+            this.errors.products = null;
+            
+            try {
+                const data = await $fetch('http://localhost:2500/server/ecommerce/GetProducts');
+                this.products = Array.isArray(data) ? data.slice(0, 10) : [];
+                
+                if (this.products.length > 0) {
+                    this.selectedProduct = this.products[0];
+                }
+            } catch (error) {
+                console.error("Failed to fetch products:", error);
+                this.errors.products = "Failed to load products. Please try again later.";
+            } finally {
+                this.loading.products = false;
+            }
+        },
+        
+        async fetchReviews() {
+            if (!this.selectedProduct) return;
+            
+            this.loading.reviews = true;
+            this.errors.reviews = null;
+            
+            try {
+                const data = await $fetch(`http://localhost:2500/server/ecommerce/GetReviews/${this.selectedProduct.id}`);
+                this.reviews = Array.isArray(data) ? data.map(review => ({
+                    ...review,
+                    helpfulActive: false,
+                    unhelpfulActive: false,
+                    date: review.createdAt ? new Date(review.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+                })) : [];
+            } catch (error) {
+                console.error("Failed to fetch reviews:", error);
+                this.errors.reviews = "Failed to load reviews. Please try again later.";
+                this.reviews = [];
+            } finally {
+                this.loading.reviews = false;
+            }
+        },
+        
+        async fetchSimilarProducts() {
+            if (!this.selectedProduct) return;
+            
+            this.loading.similarProducts = true;
+            this.errors.similarProducts = null;
+            
+            try {
+                const data = await $fetch(`http://localhost:2500/server/ecommerce/GetSimilarProducts/${this.selectedProduct.id}`);
+                this.similarProducts = Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error("Failed to fetch similar products:", error);
+                this.errors.similarProducts = "Failed to load similar products.";
+                this.similarProducts = [];
+            } finally {
+                this.loading.similarProducts = false;
+            }
+        },
+        
+        async submitReview() {
             if (!this.newReview.title.trim() || 
                 !this.newReview.author.trim() || 
                 !this.newReview.content.trim()) {
                 alert("Please fill in all required fields.");
                 return;
             }
-
-            this.reviews.unshift({
-                author: this.newReview.author,
-                rating: this.newReview.rating,
-                title: this.newReview.title,
-                content: this.newReview.content,
-                date: new Date().toISOString().split('T')[0],
-                verified: this.newReview.verified,
-                helpful: 0,
-                unhelpful: 0,
-                helpfulActive: false,
-                unhelpfulActive: false,
-                comments: []
-            });
-
-            this.newReview = {
-                title: "",
-                author: "",
-                rating: 5,
-                content: "",
-                verified: false
-            };
-
-            // Update product review count
-            this.selectedProduct.reviewCount++;
             
-            // Success animation
-            const submitBtn = document.querySelector('button[type="submit"]');
-            submitBtn.classList.add('animate-pulse');
-            setTimeout(() => submitBtn.classList.remove('animate-pulse'), 500);
-        },
-        toggleHelpful(index) {
-            const review = this.reviews[index];
-            if (!review.helpfulActive) {
-                review.helpful++;
-                review.helpfulActive = true;
-                if (review.unhelpfulActive) {
-                    review.unhelpful--;
-                    review.unhelpfulActive = false;
+            if (!this.selectedProduct) {
+                alert("Please select a product first.");
+                return;
+            }
+            
+            this.loading.submitting = true;
+            this.errors.submit = null;
+            
+            try {
+                const reviewData = {
+                    productId: this.selectedProduct.id,
+                    uid: this.currentUser?.uid || null,
+                    author: this.newReview.author,
+                    rating: this.newReview.rating,
+                    title: this.newReview.title,
+                    content: this.newReview.content,
+                    verified: this.newReview.verified
+                };
+                
+                const response = await $fetch('http://localhost:2500/server/ecommerce/AddReview', {
+                    method: 'POST',
+                    body: reviewData
+                });
+                
+                // Reset form
+                this.newReview = {
+                    title: "",
+                    author: this.currentUser?.displayName || this.currentUser?.email || "",
+                    rating: 5,
+                    content: "",
+                    verified: false
+                };
+                
+                // Refresh reviews
+                await this.fetchReviews();
+                
+                // Success animation
+                const submitBtn = document.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.classList.add('animate-pulse');
+                    setTimeout(() => submitBtn.classList.remove('animate-pulse'), 500);
                 }
-            } else {
-                review.helpful--;
-                review.helpfulActive = false;
+                
+                alert("Review submitted successfully!");
+            } catch (error) {
+                console.error("Failed to submit review:", error);
+                this.errors.submit = "Failed to submit review. Please try again.";
+                alert("Failed to submit review. Please try again.");
+            } finally {
+                this.loading.submitting = false;
             }
         },
-        toggleUnhelpful(index) {
-            const review = this.reviews[index];
-            if (!review.unhelpfulActive) {
-                review.unhelpful++;
-                review.unhelpfulActive = true;
-                if (review.helpfulActive) {
+        
+        async toggleHelpful(index) {
+            const review = this.filteredReviews[index];
+            if (!review._id) return;
+            
+            try {
+                const wasActive = review.helpfulActive;
+                const increment = !wasActive;
+                
+                await $fetch(`http://localhost:2500/server/ecommerce/UpdateReviewHelpful/${review._id}`, {
+                    method: 'PUT',
+                    body: { type: 'helpful', increment }
+                });
+                
+                if (!wasActive) {
+                    review.helpful++;
+                    review.helpfulActive = true;
+                    if (review.unhelpfulActive) {
+                        review.unhelpful--;
+                        review.unhelpfulActive = false;
+                    }
+                } else {
                     review.helpful--;
                     review.helpfulActive = false;
                 }
-            } else {
-                review.unhelpful--;
-                review.unhelpfulActive = false;
+            } catch (error) {
+                console.error("Failed to update helpful count:", error);
             }
         },
+        
+        async toggleUnhelpful(index) {
+            const review = this.filteredReviews[index];
+            if (!review._id) return;
+            
+            try {
+                const wasActive = review.unhelpfulActive;
+                const increment = !wasActive;
+                
+                await $fetch(`http://localhost:2500/server/ecommerce/UpdateReviewHelpful/${review._id}`, {
+                    method: 'PUT',
+                    body: { type: 'unhelpful', increment }
+                });
+                
+                if (!wasActive) {
+                    review.unhelpful++;
+                    review.unhelpfulActive = true;
+                    if (review.helpfulActive) {
+                        review.helpful--;
+                        review.helpfulActive = false;
+                    }
+                } else {
+                    review.unhelpful--;
+                    review.unhelpfulActive = false;
+                }
+            } catch (error) {
+                console.error("Failed to update unhelpful count:", error);
+            }
+        },
+        
         formatDate(dateStr) {
             const date = new Date(dateStr);
             return date.toLocaleDateString('en-US', { 
