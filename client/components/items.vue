@@ -57,11 +57,11 @@
                 </span>
               </button>
 
-              <button
+              <!-- <button
                 class="group px-10 py-5 rounded-2xl border-2 border-white/30 text-white font-bold hover:bg-white/15 backdrop-blur-sm transition-all duration-300 flex items-center gap-3">
                 <span>View Lookbook</span>
                 <span class="text-xl group-hover:rotate-180 transition-transform duration-500">👁️</span>
-              </button>
+              </button> -->
             </div>
 
             <!-- Feature Highlights -->
@@ -313,12 +313,12 @@
               <div class="flex items-center justify-between">
                 <div>
                   <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">₹{{ item.price }}</div>
-                  <div class="flex items-center gap-1 mt-1">
+                  <!-- <div class="flex items-center gap-1 mt-1">
                     <div class="flex text-amber-400">
                       <span v-for="star in 5" :key="star">★</span>
                     </div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">({{ item.rating?.count || 0 }})</span>
-                  </div>
+                  </div> -->
                 </div>
 
                 <NuxtLink :to="`/description?id=${item.id}`"

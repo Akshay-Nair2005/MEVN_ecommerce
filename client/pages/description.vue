@@ -204,68 +204,14 @@
       <div class="mt-20">
         <div class="text-center mb-12">
           <h2 class="text-4xl font-black bg-gradient-to-r from-gray-800 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent mb-4">
-            Similar Products
+            Customer Reviews
           </h2>
           <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Discover more amazing products from the same category
+            See what others are saying about this product
           </p>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div
-            v-for="item in similarItems.slice(0, 4)"
-            :key="item.id"
-            class="group relative bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20 dark:border-gray-700/50 transform transition-all duration-500 hover:-translate-y-4 hover:shadow-3xl"
-          >
-            <!-- NEW: Enhanced Background Glow Effect -->
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            <!-- NEW: Border Glow Effect -->
-            <div class="absolute inset-0 rounded-3xl border-2 border-transparent group-hover:border-blue-500/30 transition-all duration-500"></div>
-            
-            <div class="relative z-10">
-              <!-- Product Image -->
-              <div class="relative mb-4">
-                <img
-                  :src="item.image"
-                  :alt="item.title"
-                  class="w-full h-48 object-contain transform group-hover:scale-110 transition-transform duration-500"
-                />
-                <!-- NEW: Quick View Overlay -->
-                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-2xl transition-all duration-500 flex items-center justify-center">
-                  <div class="opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500">
-                    <span class="px-4 py-2 bg-white/90 backdrop-blur-sm text-gray-800 font-semibold rounded-full text-sm">
-                      Quick View
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Product Info -->
-              <h3 class="font-bold text-lg text-gray-800 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
-                {{ item.title }}
-              </h3>
-              <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                {{ item.description }}
-              </p>
-
-              <div class="flex items-center justify-between">
-                <div class="text-2xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                  ₹{{ item.price }}
-                </div>
-                <NuxtLink
-                  :to="`/description?id=${item.id}`"
-                  class="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all duration-300 text-sm no-underline group-hover:shadow-2xl"
-                >
-                  View Details
-                </NuxtLink>
-
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="mt-2">
-          <Review />
+          <Review :product="product" />
         </div>
       </div>
     </div>
